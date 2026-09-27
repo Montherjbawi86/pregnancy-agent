@@ -1,0 +1,32 @@
+{
+  "29641D56": {
+    "username": "mona1",
+    "partner_name": "mon",
+    "enabled": true,
+    "permissions": {
+      "week": true,
+      "due_date": true,
+      "trimester": true,
+      "measurements": false,
+      "journal": false,
+      "letters": false,
+      "ultrasounds": false,
+      "movements": false
+    },
+    "created": "2026-09-28T00:50:24.825511",
+    "views": [
+      {
+        "viewer": "mon",
+        "time": "2026-09-28T00:50:39.199660"
+      },
+      {
+        "viewer": "mon",
+        "time": "2026-09-28T00:51:43.464506"
+      },
+      {
+        "viewer": "mon",
+        "time": "2026-09-28T00:52:55.316213"
+      }
+    ]
+  }
+}

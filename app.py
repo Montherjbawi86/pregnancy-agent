@@ -11,6 +11,7 @@ from src.agent import run_agent, SYSTEM_PROMPT
 from src.auth import register_user, login_user, list_users
 from src.tools import set_user_dir
 from src.voice_safe import get_voice_recorder_html, text_to_speech
+from src.sharing import get_share_by_code, log_view, get_partner_data
 
 # ==================== تهيئة ====================
 if "messages" not in st.session_state:
@@ -31,6 +32,10 @@ if "popup_tool" not in st.session_state:
     st.session_state.popup_tool = None
 if "popup_stage" not in st.session_state:
     st.session_state.popup_stage = "input"
+if "partner_mode" not in st.session_state:
+    st.session_state.partner_mode = False
+if "partner_username" not in st.session_state:
+    st.session_state.partner_username = None
 
 # ==================== إعداد الصفحة ====================
 st.set_page_config(
@@ -520,7 +525,7 @@ def show_login_screen():
         </div>
         """, unsafe_allow_html=True)
 
-        tab_login, tab_register = st.tabs(["🔐 دخول", "✨ حساب جديد"])
+        tab_login, tab_register, tab_partner = st.tabs(["🔐 دخول", "✨ حساب جديد", "🔑 رمز الشريك"])
 
         with tab_login:
             st.markdown("#### 👋 أهلاً بعودتك")
@@ -569,12 +574,206 @@ def show_login_screen():
                     else:
                         st.error(f"❌ {result['error']}")
 
+        with tab_partner:
+            st.markdown("#### 🔑 الدخول برمز الشريك")
+            st.caption("أدخلي الرمز الذي شاركته معك زوجتك")
+
+            partner_code = st.text_input(
+                "رمز المشاركة (8 أحرف)",
+                key="partner_code_input",
+                placeholder="مثال: 57C7D11C",
+                max_chars=8
+            ).strip().upper()
+
+            st.write("")
+            if st.button("🔓 دخول", type="primary", use_container_width=True, key="partner_login_btn"):
+                if not partner_code:
+                    st.error("❌ أدخلي الرمز")
+                else:
+                    share = get_share_by_code(partner_code)
+                    if not share:
+                        st.error("❌ الرمز غير صحيح")
+                    elif not share.get("enabled"):
+                        st.error("❌ المشاركة غير مفعّلة — اطلبي من زوجتك تفعيلها")
+                    else:
+                        st.session_state.partner_mode = True
+                        st.session_state.partner_username = share["username"]
+                        # سجّل المشاهدة
+                        log_view(partner_code, share.get("partner_name") or "زائر")
+                        st.success(f"✅ أهلاً {share.get('partner_name') or 'بك'}!")
+                        st.balloons()
+                        st.rerun()
+
         existing = list_users()
         if existing:
             st.divider()
             st.caption(f"👥 المستخدمات: {', '.join(existing)}")
 
 
+# إذا كان في وضع الشريك — عرض صفحة الزوجة
+if st.session_state.get("partner_mode"):
+    st.markdown("""
+    <style>
+    .stApp {
+        background: linear-gradient(180deg, #e3f2fd 0%, #e8eaf6 100%);
+    }
+    h1 {
+        background: linear-gradient(135deg, #2196f3, #3f51b5);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-weight: 800 !important;
+        font-size: 2.5em !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+    partner_user = st.session_state.get("partner_username")
+
+    # ابحث عن الرمز
+    from src.sharing import get_share_by_code
+    partner_code = None
+    for code, share in __import__("json").load(open("notes/sharing_db.json", encoding="utf-8")).items() if __import__("os").path.exists("notes/sharing_db.json") else []:
+        if share.get("username") == partner_user:
+            partner_code = code
+            break
+
+    if not partner_code:
+        st.error("⚠️ لم يتم العثور على المشاركة")
+        if st.button("🚪 خروج"):
+            st.session_state.partner_mode = False
+            st.session_state.partner_username = None
+            st.rerun()
+        st.stop()
+
+    share = get_share_by_code(partner_code)
+    permissions = share.get("permissions", {})
+
+    # الهيدر
+    st.markdown(f"""
+    <div style="background: linear-gradient(135deg, #2196f3, #3f51b5);
+                padding: 32px; border-radius: 24px; color: white; text-align: center;
+                box-shadow: 0 12px 32px rgba(33,150,243,0.25); margin-bottom: 24px;">
+        <div style="font-size: 3em; line-height: 1;">👨</div>
+        <h1 style="margin: 16px 0 8px 0; color: white !important; font-size: 1.8em;">
+            متابعة الحمل — {partner_user}
+        </h1>
+        <p style="margin: 0; opacity: 0.95; font-size: 1.1em;">
+            أهلاً {share.get('partner_name') or 'بك'} 💕
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # جلب البيانات
+    data = get_partner_data(partner_user, permissions)
+
+    # بطاقة أسبوع الحمل
+    if "week_info" in data:
+        wi = data["week_info"]
+        st.markdown(f"""
+        <div style="background: white; padding: 28px; border-radius: 20px;
+                    box-shadow: 0 8px 24px rgba(0,0,0,0.08); margin-bottom: 20px;">
+            <h2 style="margin: 0 0 20px 0; color: #2196f3 !important; text-align: center;">
+                🤰 حالة الحمل
+            </h2>
+            <div style="display: flex; justify-content: space-around; text-align: center; flex-wrap: wrap; gap: 16px;">
+                <div style="flex: 1; min-width: 120px;">
+                    <div style="font-size: 2.5em; font-weight: 800; color: #2196f3;">
+                        {wi.get('weeks', '?')}
+                    </div>
+                    <div style="color: #8888a0; margin-top: 4px;">الأسبوع</div>
+                </div>
+                <div style="flex: 1; min-width: 120px;">
+                    <div style="font-size: 1.8em; font-weight: 700; color: #3f51b5;">
+                        {wi.get('trimester', '?')}
+                    </div>
+                    <div style="color: #8888a0; margin-top: 4px;">المرحلة</div>
+                </div>
+                <div style="flex: 1; min-width: 120px;">
+                    <div style="font-size: 2.5em; font-weight: 800; color: #e91e63;">
+                        {wi.get('days_remaining', '?')}
+                    </div>
+                    <div style="color: #8888a0; margin-top: 4px;">يوم متبقٍ</div>
+                </div>
+            </div>
+            <div style="text-align: center; margin-top: 20px; padding-top: 20px;
+                        border-top: 1px solid #e8e0ec;">
+                <div style="color: #4a4a68;">📅 موعد الولادة المتوقع</div>
+                <div style="font-size: 1.5em; font-weight: 700; color: #3f51b5; margin-top: 4px;">
+                    {wi.get('due_date', '?')}
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        # شريط التقدم
+        days_rem = wi.get("days_remaining", 280)
+        progress = min(100, max(0, ((280 - days_rem) / 280) * 100))
+        st.markdown(f"""
+        <div style="background: white; padding: 20px 24px; border-radius: 16px;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.06); margin-bottom: 20px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                <span style="color: #4a4a68; font-weight: 600;">📊 التقدم</span>
+                <span style="color: #2196f3; font-weight: 700;">{progress:.0f}%</span>
+            </div>
+            <div style="background: #e3f2fd; height: 16px; border-radius: 8px; overflow: hidden;">
+                <div style="background: linear-gradient(90deg, #2196f3, #3f51b5);
+                            height: 100%; width: {progress}%; border-radius: 8px;"></div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+    else:
+        st.info("ℹ️ لم تُشارك الزوجة معلومات الأسبوع بعد")
+
+    # القياسات (إذا مسموح)
+    if permissions.get("measurements") and data.get("measurements"):
+        st.markdown("### ⚖️ القياسات")
+        st.json(data["measurements"])
+
+    # اليوميات (إذا مسموح)
+    if permissions.get("journal") and data.get("journal"):
+        st.markdown("### 📖 اليوميات")
+        for entry in data["journal"][-5:]:
+            with st.expander(f"{entry.get('date', '')[:10]} — {entry.get('mood', ['😐', ''])[1]}"):
+                st.write(entry.get("text", ""))
+
+    # الرسائل (إذا مسموح)
+    if permissions.get("letters") and data.get("letters"):
+        st.markdown("### 💌 الرسائل")
+        for letter in data["letters"][-3:]:
+            with st.expander(f"الأسبوع {letter.get('week', '?')} — {letter.get('date', '')[:10]}"):
+                st.info(letter.get("text", ""))
+
+    # صور السونار (إذا مسموح)
+    if permissions.get("ultrasounds") and data.get("ultrasounds"):
+        st.markdown("### 📸 صور السونار")
+        us_dir = f"notes/users/{partner_user}/ultrasounds"
+        cols = st.columns(3)
+        for i, img in enumerate(data["ultrasounds"][:9]):
+            with cols[i % 3]:
+                try:
+                    st.image(f"{us_dir}/{img}", use_container_width=True)
+                except Exception:
+                    pass
+
+    # Footer
+    st.divider()
+    st.markdown(f"""
+    <div style="text-align: center; color: #8888a0; font-size: 0.9em; padding: 20px;">
+        ⚕️ هذه المعلومات تثقيفية فقط — استشيروا الطبيب في كل قرار.<br>
+        آخر تحديث: {__import__('datetime').datetime.now().strftime('%Y-%m-%d %H:%M')}
+    </div>
+    """, unsafe_allow_html=True)
+
+    # زر خروج
+    if st.button("🚪 خروج", use_container_width=True, type="primary", key="partner_logout"):
+        st.session_state.partner_mode = False
+        st.session_state.partner_username = None
+        st.rerun()
+
+    st.stop()
+
+
+# إذا لم تسجّل الدخول — شاشة الدخول
 if not st.session_state.logged_in_user:
     show_login_screen()
     st.stop()
