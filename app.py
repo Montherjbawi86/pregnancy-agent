@@ -235,6 +235,260 @@ small { font-size: 15px !important; }
     h3 { font-size: 17px !important; }
     button, .stButton > button { font-size: 15px !important; }
 }
+
+/* ============ التبويبات على الجوال — ألوان واضحة ============ */
+@media (max-width: 900px) {
+    /* حاوية التبويبات */
+    .stTabs [data-baseweb="tab-list"] {
+        overflow-x: auto !important;
+        flex-wrap: nowrap !important;
+        gap: 6px !important;
+        padding: 8px 6px !important;
+        background: linear-gradient(135deg, #fce4ec, #f3e5f5) !important;
+        border-radius: 14px !important;
+        scrollbar-width: thin !important;
+        -webkit-overflow-scrolling: touch !important;
+        /* مؤشر أن هناك المزيد */
+        border: 2px solid rgba(233, 30, 99, 0.15) !important;
+        box-shadow: inset -20px 0 15px -15px rgba(233, 30, 99, 0.2) !important;
+    }
+    
+    /* شريط التمرير */
+    .stTabs [data-baseweb="tab-list"]::-webkit-scrollbar {
+        height: 4px !important;
+    }
+    .stTabs [data-baseweb="tab-list"]::-webkit-scrollbar-thumb {
+        background: #e91e63 !important;
+        border-radius: 4px !important;
+    }
+    .stTabs [data-baseweb="tab-list"]::-webkit-scrollbar-track {
+        background: rgba(233, 30, 99, 0.1) !important;
+    }
+    
+    /* كل تبويب */
+    .stTabs [data-baseweb="tab"] {
+        background: rgba(255, 255, 255, 0.9) !important;
+        color: #4a4a68 !important;
+        border-radius: 10px !important;
+        padding: 10px 16px !important;
+        font-size: 15px !important;
+        font-weight: 600 !important;
+        white-space: nowrap !important;
+        flex-shrink: 0 !important;
+        min-height: 44px !important;
+        border: 1.5px solid rgba(233, 30, 99, 0.1) !important;
+        transition: all 0.25s ease !important;
+    }
+    
+    .stTabs [data-baseweb="tab"] * {
+        font-size: 15px !important;
+        color: #4a4a68 !important;
+    }
+    
+    /* التبويب النشط — بلون واضح */
+    .stTabs [data-baseweb="tab"][aria-selected="true"] {
+        background: linear-gradient(135deg, #e91e63 0%, #9c27b0 100%) !important;
+        color: white !important;
+        border-color: transparent !important;
+        box-shadow: 0 4px 12px rgba(233, 30, 99, 0.35) !important;
+        transform: scale(1.02) !important;
+    }
+    
+    .stTabs [data-baseweb="tab"][aria-selected="true"] * {
+        color: white !important;
+        font-weight: 700 !important;
+    }
+    
+    /* التبويب عند المرور */
+    .stTabs [data-baseweb="tab"]:hover {
+        background: rgba(233, 30, 99, 0.1) !important;
+        border-color: #e91e63 !important;
+    }
+    
+    .stTabs [data-baseweb="tab"]:hover * {
+        color: #e91e63 !important;
+    }
+    
+    /* تمييز التبويبات غير النشطة — بلون فاتح */
+    .stTabs [data-baseweb="tab"][aria-selected="false"] {
+        background: rgba(255, 255, 255, 0.95) !important;
+        color: #4a4a68 !important;
+        border: 1.5px solid rgba(233, 30, 99, 0.15) !important;
+    }
+}
+
+/* ============ الجوال الصغير ============ */
+@media (max-width: 480px) {
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 4px !important;
+        padding: 6px 4px !important;
+    }
+    
+    .stTabs [data-baseweb="tab"] {
+        padding: 8px 12px !important;
+        font-size: 14px !important;
+        min-height: 42px !important;
+    }
+    
+    .stTabs [data-baseweb="tab"] * {
+        font-size: 14px !important;
+    }
+}
+
+/* ============ الكمبيوتر — تحسين ألوان التبويبات ============ */
+@media (min-width: 901px) {
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 8px !important;
+        padding: 8px !important;
+        background: rgba(255, 255, 255, 0.7) !important;
+        backdrop-filter: blur(10px) !important;
+        border-radius: 16px !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06) !important;
+        border: 1px solid #e8e0ec !important;
+    }
+    
+    .stTabs [data-baseweb="tab"] {
+        background: rgba(255, 255, 255, 0.5) !important;
+        color: #4a4a68 !important;
+        border-radius: 12px !important;
+        padding: 12px 20px !important;
+        font-size: 17px !important;
+        font-weight: 600 !important;
+        border: 1.5px solid transparent !important;
+        transition: all 0.25s ease !important;
+    }
+    
+    .stTabs [data-baseweb="tab"] * {
+        font-size: 17px !important;
+        color: #4a4a68 !important;
+    }
+    
+    .stTabs [data-baseweb="tab"][aria-selected="true"] {
+        background: linear-gradient(135deg, #e91e63 0%, #9c27b0 100%) !important;
+        color: white !important;
+        box-shadow: 0 4px 12px rgba(233, 30, 99, 0.3) !important;
+    }
+    
+    .stTabs [data-baseweb="tab"][aria-selected="true"] * {
+        color: white !important;
+        font-weight: 700 !important;
+    }
+    
+    .stTabs [data-baseweb="tab"]:hover {
+        background: rgba(233, 30, 99, 0.08) !important;
+        border-color: rgba(233, 30, 99, 0.3) !important;
+    }
+    
+    .stTabs [data-baseweb="tab"]:hover * {
+        color: #e91e63 !important;
+    }
+}
+
+/* ============ مؤشر السحب للجوال ============ */
+@media (max-width: 900px) {
+    .stTabs::before {
+        content: '👈 اسحبي لرؤية المزيد 👉';
+        display: block;
+        text-align: center;
+        font-size: 13px;
+        color: #e91e63;
+        padding: 6px;
+        font-weight: 600;
+        opacity: 0.7;
+        margin-bottom: 4px;
+    }
+}
+
+/* ============ أسهم التنقل بين التبويبات ============ */
+.tab-nav-hint {
+    display: none;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(135deg, #e91e63 0%, #9c27b0 100%);
+    color: white;
+    padding: 10px 16px;
+    border-radius: 12px;
+    margin-bottom: 10px;
+    box-shadow: 0 4px 12px rgba(233,30,99,0.25);
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.tab-nav-hint .arrow {
+    font-size: 1.5em;
+    animation: pulse-arrow 1.5s infinite;
+}
+
+.tab-nav-hint .label {
+    flex: 1;
+    text-align: center;
+    padding: 0 10px;
+}
+
+@keyframes pulse-arrow {
+    0%, 100% { transform: translateX(0); }
+    50% { transform: translateX(-4px); }
+}
+
+@keyframes pulse-arrow-right {
+    0%, 100% { transform: translateX(0); }
+    50% { transform: translateX(4px); }
+}
+
+.tab-nav-hint .arrow-right {
+    animation: pulse-arrow-right 1.5s infinite;
+}
+
+/* يظهر فقط على الجوال */
+@media (max-width: 900px) {
+    .tab-nav-hint {
+        display: flex !important;
+    }
+}
+
+/* ============ التبويبات على الجوال — ألوان واضحة ============ */
+@media (max-width: 900px) {
+    .stTabs [data-baseweb="tab-list"] {
+        overflow-x: auto !important;
+        flex-wrap: nowrap !important;
+        gap: 6px !important;
+        padding: 8px 6px !important;
+        background: linear-gradient(135deg, #fce4ec, #f3e5f5) !important;
+        border-radius: 14px !important;
+        scrollbar-width: thin !important;
+        -webkit-overflow-scrolling: touch !important;
+        border: 2px solid rgba(233, 30, 99, 0.15) !important;
+        box-shadow: inset -20px 0 15px -15px rgba(233, 30, 99, 0.2) !important;
+    }
+    
+    .stTabs [data-baseweb="tab"] {
+        background: rgba(255, 255, 255, 0.9) !important;
+        color: #4a4a68 !important;
+        border-radius: 10px !important;
+        padding: 10px 16px !important;
+        font-size: 15px !important;
+        font-weight: 600 !important;
+        white-space: nowrap !important;
+        flex-shrink: 0 !important;
+        min-height: 44px !important;
+        border: 1.5px solid rgba(233, 30, 99, 0.1) !important;
+    }
+    
+    .stTabs [data-baseweb="tab"] * {
+        font-size: 15px !important;
+    }
+    
+    .stTabs [data-baseweb="tab"][aria-selected="true"] {
+        background: linear-gradient(135deg, #e91e63 0%, #9c27b0 100%) !important;
+        color: white !important;
+        box-shadow: 0 4px 12px rgba(233, 30, 99, 0.35) !important;
+    }
+    
+    .stTabs [data-baseweb="tab"][aria-selected="true"] * {
+        color: white !important;
+        font-weight: 700 !important;
+    }
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -438,6 +692,15 @@ st.markdown("""
 
 
 # ==================== التبويبات ====================
+
+st.markdown("""
+<div class="tab-nav-hint">
+    <span class="arrow">👉</span>
+    <span class="label">اسحبي التبويبات لرؤية المزيد</span>
+    <span class="arrow arrow-right">👈</span>
+</div>
+""", unsafe_allow_html=True)
+
 tab0, tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10, tab11, tab12, tab13, tab14, tab15, tab16 = st.tabs([
     "🏠 الرئيسية", "💬 المحادثة", "👶 الجنين", "🍎 الوصفات", "💊 الصحة",
     "🎯 الأهداف", "🎓 الدورات", "🤝 شاركي", "📸 السونار", "💌 رسائل",
