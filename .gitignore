@@ -7,19 +7,28 @@ env/
 .env
 *.env
 
+# Backups
+app.py.backup-*
+app.py.broken-*
+app.py.old*
+*.backup
+
 # User Data
-notes/
+notes/users/*/
+notes/conversations/*
+
+# Reports
 reports/
 
 # Python
 __pycache__/
-*.pyc
-*.pyo
-*.pyd
+*.py[cod]
+*$py.class
 .Python
 *.so
-.pytest_cache/
+.Pytest_cache/
 .mypy_cache/
+.ruff_cache/
 
 # OS
 .DS_Store
