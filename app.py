@@ -1780,10 +1780,12 @@ with tab13:
     st.markdown("## 📊 سجل القياسات")
     from src.tools import _load_json
     data = _load_json("measurements.json")
+    # تعريف ws و ss خارج الشرط (مهم!)
+    ws, ss = [], []
+
     if not data:
         st.info("📭 لا قياسات مسجلة — اذهبي لتبويب **⚖️ القياسات**")
     else:
-        ws, ss = [], []
         for dt in sorted(data.keys(), reverse=True):
             st.markdown(f"##### 📅 {dt}")
             for e in data[dt]:
