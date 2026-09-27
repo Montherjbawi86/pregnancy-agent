@@ -373,129 +373,29 @@ hr {
 }
 .dark-mode hr { border-color: #2a2a3e !important; }
 
-/* ============ Sidebar ============ */
-[data-testid="stSidebar"] {
-    background: linear-gradient(180deg, #ffffff 0%, #faf7fc 100%) !important;
-    border-right: 2px solid rgba(233,30,99,0.08) !important;
-    box-shadow: 4px 0 20px rgba(233,30,99,0.06);
-    min-width: 320px !important;
-}
-
-[data-testid="stSidebar"] > div:first-child {
-    padding-top: 1rem !important;
-    padding-left: 1rem !important;
-    padding-right: 1rem !important;
-}
-
-/* تحسين زر الإغلاق/الفتح */
-[data-testid="stSidebarCollapseButton"] button,
-[data-testid="collapsedControl"] button {
-    background: linear-gradient(135deg, #e91e63, #9c27b0) !important;
-    color: white !important;
-    border: none !important;
-    border-radius: 50% !important;
-    width: 40px !important;
-    height: 40px !important;
-    box-shadow: 0 4px 12px rgba(233,30,99,0.3) !important;
-    transition: all 0.3s ease !important;
-}
-
-[data-testid="stSidebarCollapseButton"] button:hover,
-[data-testid="collapsedControl"] button:hover {
-    transform: scale(1.1);
-    box-shadow: 0 6px 20px rgba(233,30,99,0.4) !important;
-}
-
-/* تحسين أزرار Sidebar */
-[data-testid="stSidebar"] .stButton > button {
-    border-radius: 12px !important;
-    padding: 10px 14px !important;
-    font-size: 14px !important;
-    margin-bottom: 6px !important;
-    transition: all 0.2s ease !important;
-    text-align: right !important;
-    background: rgba(233,30,99,0.04) !important;
-    color: #1a1a2e !important;
-    border: 1px solid rgba(233,30,99,0.1) !important;
-}
-
-[data-testid="stSidebar"] .stButton > button:hover {
-    background: linear-gradient(135deg, #e91e63, #9c27b0) !important;
-    color: white !important;
-    transform: translateX(-4px);
-    box-shadow: 0 4px 12px rgba(233,30,99,0.25) !important;
-    border-color: transparent !important;
-}
-
-/* Sub-headers في Sidebar */
-[data-testid="stSidebar"] h3,
-[data-testid="stSidebar"] .stMarkdown h3 {
-    color: #e91e63 !important;
-    font-size: 1rem !important;
-    font-weight: 700 !important;
-    padding: 8px 0 !important;
-    border-bottom: 2px solid rgba(233,30,99,0.1);
-    margin-bottom: 12px !important;
-}
-
-[data-testid="stSidebar"] hr {
-    margin: 12px 0 !important;
-    border-color: rgba(233,30,99,0.1) !important;
-}
-
-
-/* ========== إجبار Sidebar على الظهور ========== */
-[data-testid="stSidebar"] {
+/* ========== إجبار Sidebar ========== */
+section[data-testid="stSidebar"] {
     display: block !important;
     visibility: visible !important;
-    transform: translateX(0) !important;
+    position: relative !important;
+    transform: none !important;
+    margin-left: 0 !important;
+    width: 320px !important;
     min-width: 320px !important;
-    max-width: 350px !important;
+    max-width: 320px !important;
+    opacity: 1 !important;
 }
 
-/* إخفاء زر الإغلاق لمنع إخفاء Sidebar */
-[data-testid="stSidebarCollapseButton"],
-[data-testid="stSidebarCollapseButton"] button {
-    display: none !important;
-}
-
-/* إظهار زر الفتح بشكل واضح جداً */
-[data-testid="collapsedControl"] {
+section[data-testid="stSidebar"][aria-expanded="false"] {
     display: block !important;
-    background: linear-gradient(135deg, #e91e63, #9c27b0) !important;
-    border-radius: 50% !important;
-    padding: 12px !important;
-    top: 50% !important;
-    left: 12px !important;
-    transform: translateY(-50%) !important;
-    box-shadow: 0 6px 20px rgba(233,30,99,0.5) !important;
-    z-index: 9999999 !important;
-    border: 3px solid white !important;
-    animation: pulseSidebar 2s infinite !important;
-    cursor: pointer !important;
+    visibility: visible !important;
+    margin-left: 0 !important;
+    width: 320px !important;
+    min-width: 320px !important;
 }
 
-[data-testid="collapsedControl"] svg {
-    fill: white !important;
-    width: 28px !important;
-    height: 28px !important;
-}
-
-@keyframes pulseSidebar {
-    0%, 100% { transform: translateY(-50%) scale(1); }
-    50% { transform: translateY(-50%) scale(1.1); }
-}
-
-/* تحسين بطاقة المستخدمة في Sidebar */
-[data-testid="stSidebar"] > div:first-child {
-    padding: 12px !important;
-}
-
-/* Sidebar على الجوال - يظهر كطبقة منفصلة */
-@media (max-width: 768px) {
-    [data-testid="stSidebar"] {
-        min-width: 280px !important;
-    }
+[data-testid="stSidebarCollapseButton"] {
+    display: none !important;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -813,42 +713,7 @@ st.markdown("""
 
 
 # ==================== التبويبات ====================
-# ========== أزرار التنقل ==========
-NAV_LABELS = ["🏠 الرئيسية", "💬 المحادثة", "👶 الجنين", "🍎 الوصفات", "💊 الصحة", "🎯 الأهداف", "🎓 الدورات", "🤝 شاركي", "📸 السونار", "💌 رسائل", "👶 الأسماء", "📖 يومياتي", "⚖️ القياسات", "📊 السجل", "🎂 العدّاد", "🚨 الطوارئ"]
-
-st.markdown(f"""
-<div style="background: linear-gradient(135deg, #fce4ec, #f3e5f5); padding: 12px 20px;
-            border-radius: 12px; margin-bottom: 12px; text-align: center;
-            font-size: 0.95em; color: #4a4a68;">
-    💡 <b>لرؤية كل التبويبات:</b> اسحبي التبويبات يمين/يسار، أو استخدمي 
-    <code>Ctrl + PageDown</code> / <code>Ctrl + PageUp</code>
-</div>
-""", unsafe_allow_html=True)
-
-# ==================== التنقل ====================
-main_tabs = st.tabs([
-    "🏠 الرئيسية",
-    "💬 المحادثة",
-    "👶 الجنين",
-    "🍎 الوصفات",
-    "💊 الصحة",
-    "🎯 الأهداف",
-    "⚖️ القياسات",
-    "🚨 الطوارئ",
-])
-
-tab0 = main_tabs[0]
-tab1 = main_tabs[1]
-tab2 = main_tabs[2]
-tab3 = main_tabs[3]
-tab4 = main_tabs[4]
-tab5 = main_tabs[5]
-tab12 = main_tabs[6]
-tab15 = main_tabs[7]
-
-# الأقسام المخفية
-tab6 = tab7 = tab8 = tab9 = tab10 = tab11 = tab13 = tab14 = None
-
+tab0, tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10, tab11, tab12, tab13, tab14, tab15 = st.tabs(["🏠 الرئيسية", "💬 المحادثة", "👶 الجنين", "🍎 الوصفات", "💊 الصحة", "🎯 الأهداف", "🎓 الدورات", "🤝 شاركي", "📸 السونار", "💌 رسائل", "👶 الأسماء", "📖 يومياتي", "⚖️ القياسات", "📊 السجل", "🎂 العدّاد", "🚨 الطوارئ"])
 
 # ============ Tab 0: لوحة التحكم ============
 with tab0:
@@ -1392,7 +1257,7 @@ with tab5:
         st.success("🎉 ممتاز!")
 
 # ============ Tab 6: الدورات التعليمية ============
-if False:  # tab6 hidden
+with tab6:
     st.markdown("## 🎓 دورات تعليمية")
     st.caption("كل ما تحتاجين معرفته عن الحمل")
 
@@ -1437,7 +1302,7 @@ if False:  # tab6 hidden
                 st.rerun()
 
 # ============ Tab 7: شاركي ============
-if False:  # tab7 hidden
+with tab7:
     st.markdown("## 🤝 شاركي مع العائلة")
     st.caption("شاركي بيانات حملك مع الزوج أو العائلة")
 
@@ -1541,7 +1406,7 @@ if False:  # tab7 hidden
     """)
 
 # ============ Tab 8: صور السونار ============
-if False:  # tab8 hidden
+with tab8:
     st.markdown("## 📸 ألبوم صور السونار")
     st.caption("احفظي ذكريات رحلة حملك")
 
@@ -1626,7 +1491,7 @@ if False:  # tab8 hidden
                     st.rerun()
 
 # ============ Tab 9: رسائل للجنين ============
-if False:  # tab9 hidden
+with tab9:
     st.markdown("## 💌 رسائل لجنينك")
     st.caption("اكتبي رسائل مؤثرة — ستقرأها له لاحقاً")
 
@@ -1696,7 +1561,7 @@ if False:  # tab9 hidden
                     st.rerun()
 
 # ============ Tab 10: مولّد الأسماء ============
-if False:  # tab10 hidden
+with tab10:
     st.markdown("## 👶 مولّد أسماء")
     st.caption("اقتراحات أسماء عربية مع معانيها")
 
@@ -1767,7 +1632,7 @@ if False:  # tab10 hidden
         st.info("⭐ لم تضيفي أسماء بعد")
 
 # ============ Tab 11: اليوميات ============
-if False:  # tab11 hidden
+with tab11:
     st.markdown("## 📖 يوميات الحمل")
     st.caption("سجّلي مشاعرك وأحداثك اليومية")
 
@@ -1911,7 +1776,7 @@ with tab12:
             st.error(f"خطأ: {e}")
 
 # ============ Tab 13: السجل ============
-if False:  # tab13 hidden
+with tab13:
     st.markdown("## 📊 سجل القياسات")
     from src.tools import _load_json
     data = _load_json("measurements.json")
@@ -2054,7 +1919,7 @@ if False:  # tab13 hidden
 
 
 # ============ Tab 14: العدّاد التنازلي ============
-if False:  # tab14 hidden
+with tab14:
     st.markdown("## 🎂 العدّاد التنازلي للولادة")
     st.caption("تابعي رحلتك أسبوعاً بأسبوع")
 
