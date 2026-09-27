@@ -629,10 +629,49 @@ def tool_popup():
 
         tools_used = st.session_state.get("popup_tools_used", [])
         if tools_used:
-            with st.expander(f"🔧 الأدوات ({len(tools_used)})"):
-                for t in tools_used:
-                    st.markdown(f"**{t['name']}**")
-                    st.code(str(t['result'])[:400])
+            with st.expander(f"🔧 الأدوات المستخدمة ({len(tools_used)})", expanded=False):
+                for i, t in enumerate(tools_used, 1):
+                    st.markdown(f"### {i}. {t['name']}")
+                    try:
+                        import json as _json
+                        data = _json.loads(t['result'])
+                        if isinstance(data, dict):
+                            for key, value in data.items():
+                                key_ar = {
+                                    "week": "📅 الأسبوع",
+                                    "week_range": "📅 نطاق الأسابيع",
+                                    "display_ar": "📅 الأسبوع",
+                                    "size_ar": "📏 الحجم",
+                                    "len_cm": "📏 الطول (سم)",
+                                    "weight_g": "⚖️ الوزن (غرام)",
+                                    "dev_ar": "📖 التطور",
+                                    "tip_ar": "💡 نصيحة",
+                                    "title_ar": "📌 العنوان",
+                                    "tests_ar": "🩺 الفحوصات",
+                                    "tips_ar": "💡 نصائح",
+                                    "danger_ar": "⚠️ تحذير",
+                                    "due_date": "📅 موعد الولادة",
+                                    "days_remaining": "⏳ الأيام المتبقية",
+                                    "trimester": "🌸 المرحلة",
+                                }.get(key, f"📌 {key}")
+                                
+                                if isinstance(value, list):
+                                    st.markdown(f"**{key_ar}:**")
+                                    for item in value:
+                                        st.markdown(f"- {item}")
+                                elif isinstance(value, dict):
+                                    st.markdown(f"**{key_ar}:**")
+                                    for k2, v2 in value.items():
+                                        st.markdown(f"  - *{k2}*: {v2}")
+                                else:
+                                    st.markdown(f"**{key_ar}:** {value}")
+                        else:
+                            st.write(data)
+                    except Exception:
+                        st.info(str(t['result'])[:600])
+                    
+                    if i < len(tools_used):
+                        st.divider()
 
         try:
             _audio = text_to_speech(answer)
@@ -825,13 +864,64 @@ with tab0:
             st.rerun()
     with c2:
         if st.button("⚖️ القياسات", use_container_width=True):
-            st.info("اذهبي لتبويب القياسات")
+            st.session_state.quick_action = "القياسات"
+            st.rerun()
     with c3:
         if st.button("👶 حركات الجنين", use_container_width=True):
-            st.info("اسألي أمينة: أبدئي جلسة عد حركات")
+            st.session_state.popup_tool = "حركات الجنين"
+            st.session_state.popup_question = "أبدئي جلسة عد حركات الجنين"
+            st.session_state.popup_stage = "input"
+            st.rerun()
     with c4:
         if st.button("⚙️ الإعدادات", use_container_width=True):
-            st.info("اذهبي لتبويب الإعدادات")
+            st.session_state.quick_action = "الإعدادات"
+            st.rerun()
+
+    # عرض الأقسام السريعة إذا اختار المستخدم
+    if st.session_state.get("quick_action") == "القياسات":
+        st.divider()
+        st.markdown("### ⚖️ القياسات السريعة")
+        c1, c2, c3 = st.columns(3)
+        with c1:
+            _w = st.number_input("⚖️ الوزن (kg)", 30.0, 150.0, 65.0, 0.1, key="qa_w")
+        with c2:
+            _s = st.number_input("🩺 الانقباضي", 70, 200, 120, key="qa_s")
+        with c3:
+            _d = st.number_input("🩺 الانبساطي", 40, 130, 80, key="qa_d")
+        if st.button("✅ سجّلي القياس", type="primary", use_container_width=True, key="qa_log"):
+            from src.tools import log_measurement
+            st.success(log_measurement(weight_kg=_w, bp_systolic=_s, bp_diastolic=_d))
+            st.session_state.quick_action = None
+            st.rerun()
+        if st.button("✖️ إغلاق", use_container_width=True, key="qa_close"):
+            st.session_state.quick_action = None
+            st.rerun()
+
+    elif st.session_state.get("quick_action") == "الإعدادات":
+        st.divider()
+        st.markdown("### ⚙️ الإعدادات السريعة")
+        st.markdown("**🎨 المظهر:**")
+        _theme = st.radio("الوضع", ["☀️ نهاري", "🌙 ليلي"], horizontal=True, key="qa_theme")
+        if _theme == "🌙 ليلي":
+            st.markdown("""
+            <style>
+            .stApp { background: linear-gradient(180deg, #0d0d1a, #1a1a2e) !important; }
+            h1, h2, h3, h4, h5, h6, p, span, div, label, li { color: #e8e8f0 !important; }
+            </style>
+            """, unsafe_allow_html=True)
+        
+        st.markdown("**🔗 روابط سريعة:**")
+        c1, c2 = st.columns(2)
+        with c1:
+            st.link_button("🌍 WHO", "https://www.who.int/health-topics/maternal-health", use_container_width=True)
+            st.link_button("👩‍⚕️ ACOG", "https://www.acog.org/womens-health/pregnancy", use_container_width=True)
+        with c2:
+            st.link_button("🏥 NHS", "https://www.nhs.uk/pregnancy/", use_container_width=True)
+            st.link_button("🗺️ مستشفى", "https://www.google.com/maps/search/مستشفى+ولادة", use_container_width=True)
+        
+        if st.button("✖️ إغلاق", use_container_width=True, key="qa_close2"):
+            st.session_state.quick_action = None
+            st.rerun()
 
 # ============ Tab 1: المحادثة ============
 with tab1:
@@ -887,10 +977,80 @@ with tab1:
                 pass
 
             if used:
-                with st.expander(f"🔧 الأدوات ({len(used)})"):
-                    for x in used:
-                        st.markdown(f"**{x['name']}**")
-                        st.code(str(x['result'])[:400])
+                with st.expander(f"🔧 الأدوات المستخدمة ({len(used)})", expanded=False):
+                    for i, x in enumerate(used, 1):
+                        st.markdown(f"### {i}. {x['name']}")
+                        
+                        # حاول تفسير JSON
+                        try:
+                            import json as _json
+                            data = _json.loads(x['result'])
+                            
+                            # عرض حسب النوع
+                            if isinstance(data, dict):
+                                for key, value in data.items():
+                                    # ترجمة المفاتيح
+                                    key_ar = {
+                                        "week": "📅 الأسبوع",
+                                        "week_range": "📅 نطاق الأسابيع",
+                                        "display_ar": "📅 الأسبوع",
+                                        "display_en": "📅 Week",
+                                        "size_ar": "📏 الحجم",
+                                        "size_en": "📏 Size",
+                                        "len_cm": "📏 الطول (سم)",
+                                        "length_cm": "📏 الطول (سم)",
+                                        "weight_g": "⚖️ الوزن (غرام)",
+                                        "dev_ar": "📖 التطور",
+                                        "dev_en": "📖 Development",
+                                        "tip_ar": "💡 نصيحة",
+                                        "tip_en": "💡 Tip",
+                                        "title_ar": "📌 العنوان",
+                                        "title_en": "📌 Title",
+                                        "tests_ar": "🩺 الفحوصات",
+                                        "tips_ar": "💡 نصائح",
+                                        "danger_ar": "⚠️ تحذير",
+                                        "due_date": "📅 موعد الولادة",
+                                        "days_remaining": "⏳ الأيام المتبقية",
+                                        "trimester": "🌸 المرحلة",
+                                        "action_ar": "⚠️ الإجراء",
+                                        "action_en": "⚠️ Action",
+                                        "level": "🎯 المستوى",
+                                        "matched": "🔍 مطابقة",
+                                        "error": "❌ خطأ",
+                                        "results": "📚 النتائج",
+                                        "source": "📄 المصدر",
+                                        "text": "📝 النص",
+                                        "score": "📊 الصلة",
+                                        "recommendation": "💡 التوصية",
+                                        "count": "🔢 العدد",
+                                        "avg_duration_sec": "⏱️ متوسط المدة (ث)",
+                                        "avg_gap_min": "⏱️ متوسط التباعد (دقيقة)",
+                                        "week_info": "📅 معلومات الأسبوع",
+                                    }.get(key, f"📌 {key}")
+                                    
+                                    # عرض القيم
+                                    if isinstance(value, list):
+                                        st.markdown(f"**{key_ar}:**")
+                                        for item in value:
+                                            st.markdown(f"- {item}")
+                                    elif isinstance(value, dict):
+                                        st.markdown(f"**{key_ar}:**")
+                                        for k2, v2 in value.items():
+                                            st.markdown(f"  - *{k2}*: {v2}")
+                                    else:
+                                        st.markdown(f"**{key_ar}:** {value}")
+                                
+                                # إذا كان الكل JSON، اعرضه في expander
+                                with st.expander("👁️ البيانات الخام"):
+                                    st.json(data)
+                            else:
+                                st.write(data)
+                        except Exception:
+                            # ليس JSON — عرض كنص
+                            st.info(str(x['result'])[:600])
+                        
+                        if i < len(used):
+                            st.divider()
 
         st.session_state.messages.append({"role": "assistant", "content": ans})
 
