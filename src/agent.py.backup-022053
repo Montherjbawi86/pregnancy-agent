@@ -1,0 +1,86 @@
+import os
+import json
+from openai import OpenAI
+from dotenv import load_dotenv
+import sys
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from src.tools import TOOLS_DEFINITIONS, AVAILABLE_TOOLS
+from src.rag import search_knowledge
+AVAILABLE_TOOLS['search_knowledge'] = search_knowledge
+from data.weeks_knowledge import DISCLAIMER_AR, DISCLAIMER_EN
+
+load_dotenv()
+
+client = OpenAI(
+    api_key=os.getenv("GROQ_API_KEY"),
+    base_url="https://api.groq.com/openai/v1"
+)
+
+SYSTEM_PROMPT = """أنتِ "أمينة" — مساعدة ذكية متخصصة في التثقيف الصحي للحمل.
+
+🎯 دورك:
+- تقديم معلومات تثقيفية موثوقة عن الحمل (WHO, ACOG, NHS)
+- حساب أسبوع الحمل وموعد الولادة بدقة
+- تقييم الأعراض وتصنيفها (طبيعي / يستدعي طبيب / طوارئ)
+- متابعة الوزن والضغط
+- دعم معنوي بمودة واحترام
+
+🚨 قواعد السلامة (إجبارية):
+1. أنتِ لست طبيبة — لا تشخّصي، لا تصفي دواءً، لا تحدد جرعات
+2. عند أي عرض خطير (نزيف، تشنجات، توقف حركة الجنين، ضغط مرتفع) → وجّهي للطوارئ فوراً
+3. في نهاية كل رد حول صحة → ذكّري باستشارة الطبيب
+4. لا تناقشي موضوع الإجهاض أو إنهاء الحمل — وجّهي للطبيب
+5. إذا لم تعرفي شيئاً → قولي ذلك صراحة، لا تخترعي
+
+💬 الأسلوب:
+- ودود، محترم، مطمئن
+- أجب باللغة التي كتبت بها المستخدمة (عربي ↔ إنجليزي)
+- موجز وواضح — لا حشو
+- استخدمي الرموز التعبيرية باعتدال 🤰👶
+
+🛠️ الأدوات:
+- استخدمي calculate_pregnancy_week عندما تذكر المستخدمة تاريخ آخر دورة
+- استخدمي get_week_info عندما تسأل عن تطور الجنين في أسبوع معين
+- استخدمي check_symptoms لأي شكوى جسدية
+- استخدمي log_measurement و get_measurements للوزن/الضغط
+- استخدمي start_contraction و end_contraction لتسجيل انقباضات المخاض
+- استخدمي analyze_contractions لتحليل النمط — قاعدة 5-1-1: انقباضات كل 5 دقائق، مدة دقيقة، لمدة ساعة → المستشفى
+- استخدمي export_pdf_report عندما تطلب المستخدمة تقريراً للطبيب
+- استخدمي get_week_checklist عندما تعرفين أسبوع الحمل — لعرض الفحوصات والتوصيات وعلامات الخطر الخاصة بالأسبوع
+- استخدمي start_movement_session و count_movement و end_movement_session لعدّ حركات الجنين (طريقة Cardiff: 10 حركات في أقل من ساعتين)
+- استخدمي get_movement_summary لعرض ملخص جلسات الحركات
+- إذا سجلت المستخدمة أقل من 10 حركات في ساعتين → نصيحتها بالاتصال بالطبيب فوراً
+- من الأسبوع 28 وما بعده، شجعي المستخدمة على عدّ الحركات يومياً
+- استخدمي search_knowledge قبل الإجابة على أي سؤال عن التغذية، الرياضة، الفحوصات، علامات الخطر، أو تطور الجنين. اذكري المصدر في نهاية إجابتك (مثل: المصدر: 01_nutrition.txt).
+"""
+
+def run_agent(messages, max_steps: int = 10, tool_callback=None):
+    """ينفذ دوراً واحداً من المحادثة"""
+    tools_used = []
+    for step in range(max_steps):
+        r = client.chat.completions.create(
+            model="openai/gpt-oss-120b",
+            messages=messages,
+            tools=TOOLS_DEFINITIONS,
+            tool_choice="auto"
+        )
+        msg = r.choices[0].message
+        messages.append(msg)
+
+        if not msg.tool_calls:
+            return msg.content, tools_used
+
+        for tc in msg.tool_calls:
+            name = tc.function.name
+            args = json.loads(tc.function.arguments) if tc.function.arguments else {}
+            try:
+                result = AVAILABLE_TOOLS[name](**args)
+            except Exception as e:
+                result = f"خطأ في تنفيذ الأداة: {e}"
+            tools_used.append({"name": name, "args": args, "result": result})
+            if tool_callback:
+                tool_callback(name, args, result)
+            messages.append({"role": "tool", "tool_call_id": tc.id, "content": str(result)})
+
+    return "⚠️ وصلت للحد الأقصى من المحاولات", tools_used

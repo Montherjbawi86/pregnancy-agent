@@ -1,0 +1,33 @@
+# Virtual Environment
+venv/
+env/
+.venv/
+
+# Secrets
+.env
+*.env
+
+# User Data
+notes/
+reports/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+.pytest_cache/
+.mypy_cache/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
