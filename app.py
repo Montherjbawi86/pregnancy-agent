@@ -17,6 +17,16 @@ if "messages" not in st.session_state:
     st.session_state.messages = [{"role": "system", "content": SYSTEM_PROMPT}]
 if "logged_in_user" not in st.session_state:
     st.session_state.logged_in_user = None
+
+# محاولة استرجاع المستخدمة من query_params (عند refresh)
+if st.session_state.logged_in_user is None:
+    try:
+        _qp_user = st.query_params.get("u")
+        if _qp_user and _qp_user in list_users():
+            st.session_state.logged_in_user = _qp_user
+            set_user_dir(f"notes/users/{_qp_user}")
+    except Exception:
+        pass
 if "popup_tool" not in st.session_state:
     st.session_state.popup_tool = None
 if "popup_stage" not in st.session_state:
@@ -522,6 +532,10 @@ def show_login_screen():
                 if result["ok"]:
                     st.session_state.logged_in_user = result["username"]
                     set_user_dir(f"notes/users/{result['username']}")
+                    try:
+                        st.query_params["u"] = result["username"]
+                    except Exception:
+                        pass
                     st.rerun()
                 else:
                     st.error(f"❌ {result['error']}")
@@ -545,6 +559,10 @@ def show_login_screen():
                     if result["ok"]:
                         st.session_state.logged_in_user = result["username"]
                         set_user_dir(f"notes/users/{result['username']}")
+                        try:
+                            st.query_params["u"] = result["username"]
+                        except Exception:
+                            pass
                         st.success(f"🎉 أهلاً {result['username']}!")
                         st.balloons()
                         st.rerun()
@@ -2386,4 +2404,8 @@ html, body, [class*="css"], .stApp {
 
     if st.button("🚪 تسجيل خروج", use_container_width=True, type="primary", key="settings_logout_final"):
         st.session_state.logged_in_user = None
+        try:
+            st.query_params.clear()
+        except Exception:
+            pass
         st.rerun()
