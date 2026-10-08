@@ -2719,3 +2719,35 @@ st.markdown("""
 }
 </style>
 """, unsafe_allow_html=True)
+
+# ============ إصلاح التبويبات على الجوال ============
+st.markdown("""
+<style>
+.tab-nav-hint { display: none; }
+
+@media (max-width: 640px) {
+    .stTabs [data-baseweb="tab-list"] {
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        -webkit-overflow-scrolling: touch;
+        gap: 4px;
+        padding: 6px 4px;
+        touch-action: pan-x;
+    }
+    .stTabs [data-baseweb="tab"] {
+        flex-shrink: 0;
+        white-space: nowrap;
+        font-size: 12px;
+        padding: 8px 12px;
+        min-height: 40px;
+        min-width: auto;
+    }
+    .stTabs [data-baseweb="tab-list"] > button:not([role="tab"]) {
+        display: none;
+    }
+    .stTabs [data-baseweb="tab-highlight"] {
+        max-width: 120px;
+    }
+}
+</style>
+""", unsafe_allow_html=True)
