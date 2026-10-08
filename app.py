@@ -2783,3 +2783,24 @@ st.markdown("""
 }
 </style>
 """, unsafe_allow_html=True)
+
+st.markdown("""
+<style>
+[data-testid="stTabsScrollButton"],
+[data-testid*="Scroll"],
+button[aria-label*="scroll"],
+button[aria-label*="Scroll"],
+.stTabs [data-baseweb="tab-list"] > button:not([role="tab"]) {
+    display: none;
+}
+.tab-nav-hint { display: none; }
+
+@media (max-width: 768px) {
+    .stTabs [data-baseweb="tab"] {
+        font-size: 11px;
+        padding: 6px 10px;
+        min-height: 36px;
+    }
+}
+</style>
+""", unsafe_allow_html=True)
