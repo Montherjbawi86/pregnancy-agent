@@ -947,1664 +947,1745 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 
-# ==================== التبويبات ====================
 
-st.markdown("""
-<div class="tab-nav-hint">
-    <span class="arrow">👉</span>
-    <span class="label">اسحبي التبويبات لرؤية المزيد</span>
-    <span class="arrow arrow-right">👈</span>
-</div>
-""", unsafe_allow_html=True)
 
-tab0, tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10, tab11, tab12, tab13, tab14, tab15, tab16 = st.tabs([
-    "🏠 الرئيسية", "💬 المحادثة", "👶 الجنين", "🍎 الوصفات", "💊 الصحة",
-    "🎯 الأهداف", "🎓 الدورات", "🤝 شاركي", "📸 السونار", "💌 رسائل",
-    "👶 الأسماء", "📖 يومياتي", "⚖️ القياسات", "📊 السجل", "🎂 العدّاد",
-    "🚨 الطوارئ", "⚙️ الإعدادات"
+
+# ==================== التبويبات الرئيسية (جديدة) ====================
+# 5 تبويبات رئيسية بدل 17 — أفضل تجربة على الجوال
+
+main_tabs = st.tabs([
+    "🏠 الرئيسية",
+    "📊 صحتي",
+    "📖 يومياتي",
+    "🍎 تغذيتي",
+    "⚙️ إعدادات",
 ])
 
-# ============ Tab 0: لوحة التحكم ============
-with tab0:
-    st.markdown("## 🏠 لوحة التحكم")
-    st.caption("نظرة شاملة على رحلتك")
+# ════════════ المجموعة 1: 🏠 الرئيسية ════════════
+with main_tabs[0]:
 
-    from datetime import datetime as _dt_dash
+    sub_main = st.tabs([
+        "🏠 لوحة التحكم",
+        "🚨 الطوارئ",
+    ])
 
-    if "lmp_date" not in st.session_state:
-        st.session_state.lmp_date = "2026-06-01"
+    # ─── 🏠 لوحة التحكم (كان tab0) ───
+    with sub_main[0]:
+        st.markdown("## 🏠 لوحة التحكم")
+        st.caption("نظرة شاملة على رحلتك")
 
-    try:
-        from src.tools import calculate_pregnancy_week
-        w_info = json.loads(calculate_pregnancy_week(st.session_state.lmp_date))
-        weeks = w_info["weeks"]
-        days_rem = w_info["days_remaining"]
-        trimester = w_info["trimester"]
-        due_date = w_info["due_date"]
-        progress_pct = min(100, max(0, (280 - days_rem) / 280 * 100))
+        from datetime import datetime as _dt_dash
 
-        st.markdown(f"""
-        <div style="background: linear-gradient(135deg, #e91e63, #9c27b0);
-                    padding: 32px; border-radius: 24px; color: white;
-                    box-shadow: 0 12px 32px rgba(233,30,99,0.25); margin-bottom: 24px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
-                <div>
-                    <div style="font-size: 1.1em; opacity: 0.9;">أهلاً {st.session_state.logged_in_user} 👋</div>
-                    <div style="font-size: 2.5em; font-weight: 800; margin-top: 8px;">
-                        الأسبوع {weeks}
-                    </div>
-                    <div style="font-size: 1.1em; opacity: 0.95; margin-top: 4px;">
-                        {trimester} • {days_rem} يوم متبقٍ
-                    </div>
-                </div>
-                <div style="text-align: center;">
-                    <div style="font-size: 3.5em;">🤰</div>
-                    <div style="font-size: 0.9em; opacity: 0.9; margin-top: 4px;">{due_date}</div>
-                </div>
-            </div>
-            <div style="background: rgba(255,255,255,0.2); height: 10px; border-radius: 5px;
-                        margin-top: 20px; overflow: hidden;">
-                <div style="background: white; height: 100%; width: {progress_pct}%;
-                            border-radius: 5px;"></div>
-            </div>
-            <div style="display: flex; justify-content: space-between; margin-top: 8px;
-                        font-size: 0.85em; opacity: 0.9;">
-                <span>🌱 بداية</span>
-                <span>{progress_pct:.0f}% مكتمل</span>
-                <span>🎉 الولادة</span>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-    except Exception:
-        st.warning("⚠️ تأكدي من تاريخ آخر دورة في تبويب العدّاد")
+        if "lmp_date" not in st.session_state:
+            st.session_state.lmp_date = "2026-06-01"
 
-    st.markdown("### 📊 إحصائياتك")
+        try:
+            from src.tools import calculate_pregnancy_week
+            w_info = json.loads(calculate_pregnancy_week(st.session_state.lmp_date))
+            weeks = w_info["weeks"]
+            days_rem = w_info["days_remaining"]
+            trimester = w_info["trimester"]
+            due_date = w_info["due_date"]
+            progress_pct = min(100, max(0, (280 - days_rem) / 280 * 100))
 
-    user_dir = f"notes/users/{st.session_state.logged_in_user}"
-
-    us_dir = os.path.join(user_dir, "ultrasounds")
-    us_count = 0
-    if os.path.exists(us_dir):
-        us_count = len([f for f in os.listdir(us_dir) if f.lower().endswith(("jpg", "jpeg", "png", "webp"))])
-
-    letters_file = os.path.join(user_dir, "letters", "letters.json")
-    letters_count = 0
-    if os.path.exists(letters_file):
-        with open(letters_file, "r", encoding="utf-8") as f:
-            letters_count = len(json.load(f))
-
-    journal_file = os.path.join(user_dir, "journal", "entries.json")
-    journal_count = 0
-    if os.path.exists(journal_file):
-        with open(journal_file, "r", encoding="utf-8") as f:
-            journal_count = len(json.load(f))
-
-    from src.tools import _load_json
-    measurements = _load_json("measurements.json")
-    meas_count = sum(len(v) for v in measurements.values()) if measurements else 0
-
-    c1, c2, c3, c4 = st.columns(4)
-    with c1:
-        st.metric("📸 صور السونار", us_count)
-    with c2:
-        st.metric("💌 رسائل", letters_count)
-    with c3:
-        st.metric("📖 يوميات", journal_count)
-    with c4:
-        st.metric("⚖️ قياسات", meas_count)
-
-    st.divider()
-    st.markdown("### 💡 نصيحة اليوم")
-
-    tips = [
-        "اشربي 8-10 أكواب ماء يومياً 💧",
-        "نامي على جانبك الأيسر 😴",
-        "مارسي المشي 30 دقيقة 🚶‍♀️",
-        "تناولي حمض الفوليك يومياً 🌿",
-        "أكثري من الخضار الورقية 🥬",
-        "تجنبي الكافيين الزائد ☕",
-        "خذي قسطاً كافياً من الراحة 🛋️",
-        "تحدثي مع جنينك — يسمعك! 👶",
-    ]
-    tip_index = _dt_dash.now().day % len(tips)
-    st.info(f"💡 {tips[tip_index]}")
-
-    st.divider()
-    st.markdown("### ⚡ إجراءات سريعة")
-
-    c1, c2, c3, c4 = st.columns(4)
-    with c1:
-        if st.button("💬 اسألي أمينة", use_container_width=True, type="primary"):
-            st.session_state.popup_tool = "سؤال سريع"
-            st.session_state.popup_question = "ما أهم نصائح الحمل في أسبوعي الحالي؟"
-            st.session_state.popup_stage = "input"
-            st.rerun()
-    with c2:
-        if st.button("⚖️ القياسات", use_container_width=True):
-            st.session_state.quick_action = "القياسات"
-            st.rerun()
-    with c3:
-        if st.button("👶 حركات الجنين", use_container_width=True):
-            st.session_state.popup_tool = "حركات الجنين"
-            st.session_state.popup_question = "أبدئي جلسة عد حركات الجنين"
-            st.session_state.popup_stage = "input"
-            st.rerun()
-    with c4:
-        if st.button("⚙️ الإعدادات", use_container_width=True):
-            st.session_state.quick_action = "الإعدادات"
-            st.rerun()
-
-    # عرض الأقسام السريعة إذا اختار المستخدم
-    if st.session_state.get("quick_action") == "القياسات":
-        st.divider()
-        st.markdown("### ⚖️ القياسات السريعة")
-        c1, c2, c3 = st.columns(3)
-        with c1:
-            _w = st.number_input("⚖️ الوزن (kg)", 30.0, 150.0, 65.0, 0.1, key="qa_w")
-        with c2:
-            _s = st.number_input("🩺 الانقباضي", 70, 200, 120, key="qa_s")
-        with c3:
-            _d = st.number_input("🩺 الانبساطي", 40, 130, 80, key="qa_d")
-        if st.button("✅ سجّلي القياس", type="primary", use_container_width=True, key="qa_log"):
-            from src.tools import log_measurement
-            st.success(log_measurement(weight_kg=_w, bp_systolic=_s, bp_diastolic=_d))
-            st.session_state.quick_action = None
-            st.rerun()
-        if st.button("✖️ إغلاق", use_container_width=True, key="qa_close"):
-            st.session_state.quick_action = None
-            st.rerun()
-
-    elif st.session_state.get("quick_action") == "الإعدادات":
-        st.divider()
-        st.markdown("### ⚙️ الإعدادات السريعة")
-        st.markdown("**🎨 المظهر:**")
-        _theme = st.radio("الوضع", ["☀️ نهاري", "🌙 ليلي"], horizontal=True, key="qa_theme")
-        if _theme == "🌙 ليلي":
-            st.markdown("""
-            <style>
-            .stApp { background: linear-gradient(180deg, #0d0d1a, #1a1a2e) !important; }
-            h1, h2, h3, h4, h5, h6, p, span, div, label, li { color: #e8e8f0 !important; }
-            </style>
-            """, unsafe_allow_html=True)
-        
-        st.markdown("**🔗 روابط سريعة:**")
-        c1, c2 = st.columns(2)
-        with c1:
-            st.link_button("🌍 WHO", "https://www.who.int/health-topics/maternal-health", use_container_width=True)
-            st.link_button("👩‍⚕️ ACOG", "https://www.acog.org/womens-health/pregnancy", use_container_width=True)
-        with c2:
-            st.link_button("🏥 NHS", "https://www.nhs.uk/pregnancy/", use_container_width=True)
-            st.link_button("🗺️ مستشفى", "https://www.google.com/maps/search/مستشفى+ولادة", use_container_width=True)
-        
-        if st.button("✖️ إغلاق", use_container_width=True, key="qa_close2"):
-            st.session_state.quick_action = None
-            st.rerun()
-
-# ============ Tab 1: المحادثة ============
-with tab1:
-    def safe_get(msg, key, default=None):
-        return msg.get(key, default) if isinstance(msg, dict) else getattr(msg, key, default)
-
-    for msg in st.session_state.messages:
-        role = safe_get(msg, "role")
-        content = safe_get(msg, "content")
-        if role == "user":
-            with st.chat_message("user", avatar="👤"):
-                st.write(content)
-        elif role == "assistant" and content:
-            with st.chat_message("assistant", avatar="🤰"):
-                st.write(content)
-
-    st.markdown("**🎤 الإدخال الصوتي**")
-    st.components.v1.html(get_voice_recorder_html(), height=80)
-    st.markdown("**⌨️ أو اكتبي:**")
-
-    pending = st.session_state.pop("pending_question", None)
-    prompt_value = pending
-
-    p = None
-    if prompt_value:
-        p = prompt_value
-    else:
-        p = st.chat_input("اكتبي سؤالك...")
-
-    if p:
-        with st.chat_message("user", avatar="👤"):
-            st.write(p)
-        st.session_state.messages.append({"role": "user", "content": p})
-        with st.chat_message("assistant", avatar="🤰"):
-            with st.spinner("🤰 أمينة تفكر..."):
-                try:
-                    ans, used = run_agent(st.session_state.messages)
-                except Exception as e:
-                    err = str(e)
-                    if "429" in err or "Rate limit" in err:
-                        ans = "⏳ عذراً، وصلنا للحد اليومي. انتظري 10-15 دقيقة."
-                    else:
-                        ans = f"⚠️ خطأ: {err[:200]}"
-                    used = []
-            st.write(ans)
-
-            try:
-                _audio = text_to_speech(ans)
-                if _audio:
-                    st.markdown("**🔊 استمعي للرد:**")
-                    st.audio(_audio, format="audio/mp3")
-            except Exception:
-                pass
-
-            if used:
-                with st.expander(f"🔧 الأدوات المستخدمة ({len(used)})", expanded=False):
-                    for i, x in enumerate(used, 1):
-                        st.markdown(f"### {i}. {x['name']}")
-                        
-                        # حاول تفسير JSON
-                        try:
-                            import json as _json
-                            data = _json.loads(x['result'])
-                            
-                            # عرض حسب النوع
-                            if isinstance(data, dict):
-                                for key, value in data.items():
-                                    # ترجمة المفاتيح
-                                    key_ar = {
-                                        "week": "📅 الأسبوع",
-                                        "week_range": "📅 نطاق الأسابيع",
-                                        "display_ar": "📅 الأسبوع",
-                                        "display_en": "📅 Week",
-                                        "size_ar": "📏 الحجم",
-                                        "size_en": "📏 Size",
-                                        "len_cm": "📏 الطول (سم)",
-                                        "length_cm": "📏 الطول (سم)",
-                                        "weight_g": "⚖️ الوزن (غرام)",
-                                        "dev_ar": "📖 التطور",
-                                        "dev_en": "📖 Development",
-                                        "tip_ar": "💡 نصيحة",
-                                        "tip_en": "💡 Tip",
-                                        "title_ar": "📌 العنوان",
-                                        "title_en": "📌 Title",
-                                        "tests_ar": "🩺 الفحوصات",
-                                        "tips_ar": "💡 نصائح",
-                                        "danger_ar": "⚠️ تحذير",
-                                        "due_date": "📅 موعد الولادة",
-                                        "days_remaining": "⏳ الأيام المتبقية",
-                                        "trimester": "🌸 المرحلة",
-                                        "action_ar": "⚠️ الإجراء",
-                                        "action_en": "⚠️ Action",
-                                        "level": "🎯 المستوى",
-                                        "matched": "🔍 مطابقة",
-                                        "error": "❌ خطأ",
-                                        "results": "📚 النتائج",
-                                        "source": "📄 المصدر",
-                                        "text": "📝 النص",
-                                        "score": "📊 الصلة",
-                                        "recommendation": "💡 التوصية",
-                                        "count": "🔢 العدد",
-                                        "avg_duration_sec": "⏱️ متوسط المدة (ث)",
-                                        "avg_gap_min": "⏱️ متوسط التباعد (دقيقة)",
-                                        "week_info": "📅 معلومات الأسبوع",
-                                    }.get(key, f"📌 {key}")
-                                    
-                                    # عرض القيم
-                                    if isinstance(value, list):
-                                        st.markdown(f"**{key_ar}:**")
-                                        for item in value:
-                                            st.markdown(f"- {item}")
-                                    elif isinstance(value, dict):
-                                        st.markdown(f"**{key_ar}:**")
-                                        for k2, v2 in value.items():
-                                            st.markdown(f"  - *{k2}*: {v2}")
-                                    else:
-                                        st.markdown(f"**{key_ar}:** {value}")
-                                
-                                # إذا كان الكل JSON، اعرضه في expander
-                                with st.expander("👁️ البيانات الخام"):
-                                    st.json(data)
-                            else:
-                                st.write(data)
-                        except Exception:
-                            # ليس JSON — عرض كنص
-                            st.info(str(x['result'])[:600])
-                        
-                        if i < len(used):
-                            st.divider()
-
-        st.session_state.messages.append({"role": "assistant", "content": ans})
-
-# ============ Tab 2: الجنين ============
-with tab2:
-    st.markdown("## 👶 تطور الجنين")
-    st.caption("اختاري الأسبوع لعرض تفاصيل الجنين")
-
-    from data.fetus_development import get_fetus_week
-
-    if "fetus_week_value" not in st.session_state:
-        st.session_state.fetus_week_value = 20
-
-    col_week, col_info = st.columns([1, 2])
-    with col_week:
-        week_input = st.number_input(
-            "📅 الأسبوع",
-            min_value=4, max_value=40,
-            value=st.session_state.fetus_week_value,
-            step=1,
-            key="fetus_week_widget"
-        )
-        if week_input != st.session_state.fetus_week_value:
-            st.session_state.fetus_week_value = week_input
-
-        st.markdown("**اختيار سريع:**")
-        quick = [8, 12, 16, 20, 24, 28, 32, 36, 40]
-        cols = st.columns(3)
-        for i, w in enumerate(quick):
-            with cols[i % 3]:
-                if st.button(f"أ{w}", key=f"quick_w_{w}", use_container_width=True):
-                    st.session_state.fetus_week_value = w
-                    st.rerun()
-
-    with col_info:
-        data = get_fetus_week(week_input)
-
-        st.markdown(f"""
-        <div style="background: linear-gradient(135deg, #fce4ec, #f3e5f5);
-                    padding: 32px; border-radius: 20px; text-align: center;
-                    box-shadow: 0 8px 24px rgba(233,30,99,0.15); margin-bottom: 16px;">
-            <div style="font-size: 6em; line-height: 1;">{data['emoji']}</div>
-            <h2 style="margin: 16px 0 8px 0; color: #e91e63 !important;">
-                الأسبوع {data['shown_week']}
-            </h2>
-            <p style="font-size: 1.3em; color: #4a4a68; margin: 8px 0;">
-                حجم {data['size_ar']}
-            </p>
-            <p style="color: #8888a0; font-size: 0.95em;">{data['size_en']}</p>
-        </div>
-        """, unsafe_allow_html=True)
-
-        c1, c2 = st.columns(2)
-        with c1:
-            st.metric("📏 الطول", f"{data['length_cm']} cm")
-        with c2:
-            st.metric("⚖️ الوزن", f"{data['weight_g']} g")
-
-    st.divider()
-    st.markdown(f"### 📖 تطور الجنين في الأسبوع {data['shown_week']}")
-    st.info(data['dev_ar'])
-
-    st.markdown(f"### 💡 نصيحة للأسبوع {data['shown_week']}")
-    st.success(data['tip_ar'])
-
-    st.divider()
-    if st.button(f"💬 اسألي أمينة عن الأسبوع {data['shown_week']}", type="primary", use_container_width=True, key="ask_fetus"):
-        q = f"ماذا يحدث في الأسبوع {data['shown_week']} من الحمل؟"
-        st.session_state.messages.append({"role": "user", "content": q})
-        st.session_state.pending_question = q
-        st.rerun()
-
-# ============ Tab 3: الوصفات ============
-with tab3:
-    st.markdown("## 🍎 وصفات طعام للحمل")
-    st.caption("وصفات مقسمة حسب حاجتك")
-
-    from data.recipes import get_recipe_categories, get_category_recipes
-
-    categories = get_recipe_categories()
-    cat_names = {k: v for k, v in categories}
-
-    selected_cat = st.selectbox(
-        "🎯 اختاري الفئة:",
-        list(cat_names.keys()),
-        format_func=lambda x: cat_names[x],
-        key="recipe_cat_v3"
-    )
-
-    if selected_cat:
-        cat_data = get_category_recipes(selected_cat)
-        st.markdown(f"### {cat_data['title']}")
-        st.caption(cat_data['description'])
-        for i, recipe in enumerate(cat_data["recipes"]):
-            with st.expander(f"🍽️ **{recipe['name']}** — ⏱️ {recipe['time']}", expanded=(i == 0)):
-                c1, c2 = st.columns(2)
-                with c1:
-                    st.markdown("**🛒 المكونات:**")
-                    for ing in recipe["ingredients"]:
-                        st.markdown(f"- {ing}")
-                with c2:
-                    st.markdown("**👩‍🍳 التحضير:**")
-                    for j, step in enumerate(recipe["steps"], 1):
-                        st.markdown(f"{j}. {step}")
-                st.success(f"💚 **الفوائد:** {recipe['benefits']}")
-
-    st.divider()
-    if st.button("💬 اسألي أمينة عن التغذية", type="primary", use_container_width=True, key="ask_recipes_v3"):
-        q = "ما الأطعمة المهمة في الحمل؟ وما الأطعمة الممنوعة؟"
-        st.session_state.messages.append({"role": "user", "content": q})
-        st.session_state.pending_question = q
-        st.rerun()
-
-# ============ Tab 4: الصحة ============
-with tab4:
-    st.markdown("## 💊 الصحة اليومية")
-    st.caption("فيتامينات + تمارين تنفس")
-
-    from data.vitamins import get_vitamins_for_week
-    from datetime import datetime
-
-    if "lmp_date" not in st.session_state:
-        st.session_state.lmp_date = "2026-06-01"
-
-    try:
-        from src.tools import calculate_pregnancy_week
-        week_info = json.loads(calculate_pregnancy_week(st.session_state.lmp_date))
-        current_week = week_info["weeks"]
-    except Exception:
-        current_week = 20
-
-    st.info(f"📅 بناءً على أسبوعك الحالي ({current_week})")
-
-    vitamins = get_vitamins_for_week(current_week)
-    today = datetime.now().strftime("%Y-%m-%d")
-    if "vitamins_taken" not in st.session_state:
-        st.session_state.vitamins_taken = {}
-    if today not in st.session_state.vitamins_taken:
-        st.session_state.vitamins_taken[today] = []
-
-    cols = st.columns(2)
-    for i, v in enumerate(vitamins):
-        taken = v["name"] in st.session_state.vitamins_taken[today]
-        with cols[i % 2]:
-            border = "#4caf50" if taken else "#e91e63"
-            bg = "#e8f5e9" if taken else "#ffffff"
             st.markdown(f"""
-            <div style="background: {bg}; padding: 16px; border-radius: 14px;
-                        border-right: 4px solid {border}; margin: 8px 0;
-                        box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-                <div style="font-size: 1.8em;">{v['emoji']}</div>
-                <div style="font-weight: 700; color: #1a1a2e; margin-top: 4px;">{v['name']}</div>
-                <div style="color: #e91e63; font-weight: 600;">{v['dose']}</div>
-                <div style="color: #8888a0; font-size: 0.85em;">⏰ {v['when']}</div>
-                <div style="color: #4a4a68; font-size: 0.85em;">💚 {v['why']}</div>
+            <div style="background: linear-gradient(135deg, #e91e63, #9c27b0);
+                        padding: 32px; border-radius: 24px; color: white;
+                        box-shadow: 0 12px 32px rgba(233,30,99,0.25); margin-bottom: 24px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
+                    <div>
+                        <div style="font-size: 1.1em; opacity: 0.9;">أهلاً {st.session_state.logged_in_user} 👋</div>
+                        <div style="font-size: 2.5em; font-weight: 800; margin-top: 8px;">
+                            الأسبوع {weeks}
+                        </div>
+                        <div style="font-size: 1.1em; opacity: 0.95; margin-top: 4px;">
+                            {trimester} • {days_rem} يوم متبقٍ
+                        </div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 3.5em;">🤰</div>
+                        <div style="font-size: 0.9em; opacity: 0.9; margin-top: 4px;">{due_date}</div>
+                    </div>
+                </div>
+                <div style="background: rgba(255,255,255,0.2); height: 10px; border-radius: 5px;
+                            margin-top: 20px; overflow: hidden;">
+                    <div style="background: white; height: 100%; width: {progress_pct}%;
+                                border-radius: 5px;"></div>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-top: 8px;
+                            font-size: 0.85em; opacity: 0.9;">
+                    <span>🌱 بداية</span>
+                    <span>{progress_pct:.0f}% مكتمل</span>
+                    <span>🎉 الولادة</span>
+                </div>
             </div>
             """, unsafe_allow_html=True)
-            if st.button("✅ تم" if taken else "☐ لم يتناول", key=f"vit_{v['name']}_{today}", use_container_width=True):
-                if taken:
-                    st.session_state.vitamins_taken[today].remove(v["name"])
-                else:
-                    st.session_state.vitamins_taken[today].append(v["name"])
+        except Exception:
+            st.warning("⚠️ تأكدي من تاريخ آخر دورة في تبويب العدّاد")
+
+        st.markdown("### 📊 إحصائياتك")
+
+        user_dir = f"notes/users/{st.session_state.logged_in_user}"
+
+        us_dir = os.path.join(user_dir, "ultrasounds")
+        us_count = 0
+        if os.path.exists(us_dir):
+            us_count = len([f for f in os.listdir(us_dir) if f.lower().endswith(("jpg", "jpeg", "png", "webp"))])
+
+        letters_file = os.path.join(user_dir, "letters", "letters.json")
+        letters_count = 0
+        if os.path.exists(letters_file):
+            with open(letters_file, "r", encoding="utf-8") as f:
+                letters_count = len(json.load(f))
+
+        journal_file = os.path.join(user_dir, "journal", "entries.json")
+        journal_count = 0
+        if os.path.exists(journal_file):
+            with open(journal_file, "r", encoding="utf-8") as f:
+                journal_count = len(json.load(f))
+
+        from src.tools import _load_json
+        measurements = _load_json("measurements.json")
+        meas_count = sum(len(v) for v in measurements.values()) if measurements else 0
+
+        c1, c2, c3, c4 = st.columns(4)
+        with c1:
+            st.metric("📸 صور السونار", us_count)
+        with c2:
+            st.metric("💌 رسائل", letters_count)
+        with c3:
+            st.metric("📖 يوميات", journal_count)
+        with c4:
+            st.metric("⚖️ قياسات", meas_count)
+
+        st.divider()
+        st.markdown("### 💡 نصيحة اليوم")
+
+        tips = [
+            "اشربي 8-10 أكواب ماء يومياً 💧",
+            "نامي على جانبك الأيسر 😴",
+            "مارسي المشي 30 دقيقة 🚶‍♀️",
+            "تناولي حمض الفوليك يومياً 🌿",
+            "أكثري من الخضار الورقية 🥬",
+            "تجنبي الكافيين الزائد ☕",
+            "خذي قسطاً كافياً من الراحة 🛋️",
+            "تحدثي مع جنينك — يسمعك! 👶",
+        ]
+        tip_index = _dt_dash.now().day % len(tips)
+        st.info(f"💡 {tips[tip_index]}")
+
+        st.divider()
+        st.markdown("### ⚡ إجراءات سريعة")
+
+        c1, c2, c3, c4 = st.columns(4)
+        with c1:
+            if st.button("💬 اسألي أمينة", use_container_width=True, type="primary"):
+                st.session_state.popup_tool = "سؤال سريع"
+                st.session_state.popup_question = "ما أهم نصائح الحمل في أسبوعي الحالي؟"
+                st.session_state.popup_stage = "input"
+                st.rerun()
+        with c2:
+            if st.button("⚖️ القياسات", use_container_width=True):
+                st.session_state.quick_action = "القياسات"
+                st.rerun()
+        with c3:
+            if st.button("👶 حركات الجنين", use_container_width=True):
+                st.session_state.popup_tool = "حركات الجنين"
+                st.session_state.popup_question = "أبدئي جلسة عد حركات الجنين"
+                st.session_state.popup_stage = "input"
+                st.rerun()
+        with c4:
+            if st.button("⚙️ الإعدادات", use_container_width=True):
+                st.session_state.quick_action = "الإعدادات"
                 st.rerun()
 
-    st.divider()
-    st.markdown("### 🧘 تمارين التنفس")
+        # عرض الأقسام السريعة إذا اختار المستخدم
+        if st.session_state.get("quick_action") == "القياسات":
+            st.divider()
+            st.markdown("### ⚖️ القياسات السريعة")
+            c1, c2, c3 = st.columns(3)
+            with c1:
+                _w = st.number_input("⚖️ الوزن (kg)", 30.0, 150.0, 65.0, 0.1, key="qa_w")
+            with c2:
+                _s = st.number_input("🩺 الانقباضي", 70, 200, 120, key="qa_s")
+            with c3:
+                _d = st.number_input("🩺 الانبساطي", 40, 130, 80, key="qa_d")
+            if st.button("✅ سجّلي القياس", type="primary", use_container_width=True, key="qa_log"):
+                from src.tools import log_measurement
+                st.success(log_measurement(weight_kg=_w, bp_systolic=_s, bp_diastolic=_d))
+                st.session_state.quick_action = None
+                st.rerun()
+            if st.button("✖️ إغلاق", use_container_width=True, key="qa_close"):
+                st.session_state.quick_action = None
+                st.rerun()
 
-    from data.breathing import BREATHING_EXERCISES
-    for i, ex in enumerate(BREATHING_EXERCISES):
-        with st.expander(f"{ex['emoji']} **{ex['name']}**", expanded=(i == 0)):
-            st.markdown(f"**💚** {ex['benefit']}")
-            for j, step in enumerate(ex['steps'], 1):
-                st.markdown(f"{j}. {step}")
+        elif st.session_state.get("quick_action") == "الإعدادات":
+            st.divider()
+            st.markdown("### ⚙️ الإعدادات السريعة")
+            st.markdown("**🎨 المظهر:**")
+            _theme = st.radio("الوضع", ["☀️ نهاري", "🌙 ليلي"], horizontal=True, key="qa_theme")
+            if _theme == "🌙 ليلي":
+                st.markdown("""
+                <style>
+                .stApp { background: linear-gradient(180deg, #0d0d1a, #1a1a2e) !important; }
+                h1, h2, h3, h4, h5, h6, p, span, div, label, li { color: #e8e8f0 !important; }
+                </style>
+                """, unsafe_allow_html=True)
 
-# ============ Tab 5: الأهداف ============
-with tab5:
-    st.markdown("## 🎯 أهدافك الصحية")
-    st.caption("تتبعي تقدمك اليومي")
+            st.markdown("**🔗 روابط سريعة:**")
+            c1, c2 = st.columns(2)
+            with c1:
+                st.link_button("🌍 WHO", "https://www.who.int/health-topics/maternal-health", use_container_width=True)
+                st.link_button("👩‍⚕️ ACOG", "https://www.acog.org/womens-health/pregnancy", use_container_width=True)
+            with c2:
+                st.link_button("🏥 NHS", "https://www.nhs.uk/pregnancy/", use_container_width=True)
+                st.link_button("🗺️ مستشفى", "https://www.google.com/maps/search/مستشفى+ولادة", use_container_width=True)
 
-    from data.goals import GOALS
-    from datetime import datetime
+            if st.button("✖️ إغلاق", use_container_width=True, key="qa_close2"):
+                st.session_state.quick_action = None
+                st.rerun()
 
-    today = datetime.now().strftime("%Y-%m-%d")
-    if "goals_progress" not in st.session_state:
-        st.session_state.goals_progress = {}
-    if today not in st.session_state.goals_progress:
-        st.session_state.goals_progress[today] = {k: 0 for k in GOALS}
+    # ============ Tab 1: المحادثة ============
 
-    progress = st.session_state.goals_progress[today]
+    # ─── 🚨 الطوارئ (كان tab15) ───
+    with sub_main[1]:
+        st.markdown("## 🚨 الطوارئ")
 
-    cols = st.columns(2)
-    for i, (key, goal) in enumerate(GOALS.items()):
-        current = progress.get(key, 0)
-        target = goal["target"]
-        pct = min(100, (current / target) * 100)
-        color = "#4caf50" if pct >= 100 else "#e91e63"
+        st.error("""
+        **🚨 اذهبي للمستشفى فوراً إذا:**
+        - 🩸 نزيف مهبلي غزير
+        - 🤕 صداع شديد مع ضبابية الرؤية
+        - 💥 تشنجات
+        - 😖 ألم بطن حاد
+        - 👶 توقف حركة الجنين
+        - 🩺 ضغط 140/90 أو أعلى
+        - 🌡️ حرارة فوق 39
+        - 💧 تسرب سائل قبل الأسبوع 37
+        - ⏱️ انقباضات منتظمة قبل الأسبوع 37
+        """)
 
-        with cols[i % 2]:
+        st.warning("""
+        **⚠️ اتصلي بطبيبك اليوم:**
+        - نزيف خفيف أو تبقيع
+        - ألم بطن متقطع
+        - حرقة بول
+        - تورم مفاجئ
+        - إفرازات غير طبيعية
+        - قلق مستمر
+        """)
+
+        st.markdown("### 📞 أرقام الطوارئ")
+        c1, c2, c3 = st.columns(3)
+        with c1:
+            st.metric("🚑 سوريا", "110")
+        with c2:
+            st.metric("🚑 أمريكا", "911")
+        with c3:
+            st.metric("🚑 بريطانيا", "999")
+
+    # ============ Tab 16: الإعدادات ============
+
+
+# ════════════ المجموعة 2: 📊 صحتي ════════════
+with main_tabs[1]:
+
+    sub_health = st.tabs([
+        "👶 الجنين",
+        "💊 الصحة",
+        "📸 السونار",
+        "⚖️ القياسات",
+        "📊 السجل",
+    ])
+
+    # ─── 👶 الجنين (كان tab2) ───
+    with sub_health[0]:
+        st.markdown("## 👶 تطور الجنين")
+        st.caption("اختاري الأسبوع لعرض تفاصيل الجنين")
+
+        from data.fetus_development import get_fetus_week
+
+        if "fetus_week_value" not in st.session_state:
+            st.session_state.fetus_week_value = 20
+
+        col_week, col_info = st.columns([1, 2])
+        with col_week:
+            week_input = st.number_input(
+                "📅 الأسبوع",
+                min_value=4, max_value=40,
+                value=st.session_state.fetus_week_value,
+                step=1,
+                key="fetus_week_widget"
+            )
+            if week_input != st.session_state.fetus_week_value:
+                st.session_state.fetus_week_value = week_input
+
+            st.markdown("**اختيار سريع:**")
+            quick = [8, 12, 16, 20, 24, 28, 32, 36, 40]
+            cols = st.columns(3)
+            for i, w in enumerate(quick):
+                with cols[i % 3]:
+                    if st.button(f"أ{w}", key=f"quick_w_{w}", use_container_width=True):
+                        st.session_state.fetus_week_value = w
+                        st.rerun()
+
+        with col_info:
+            data = get_fetus_week(week_input)
+
             st.markdown(f"""
-            <div style="background: white; padding: 18px; border-radius: 14px;
-                        box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin: 8px 0;
-                        border: 1px solid #e8e0ec;">
-                <div style="display: flex; justify-content: space-between;">
-                    <div style="font-weight: 700; color: #1a1a2e;">{goal['label']}</div>
-                    <div style="font-weight: 800; color: {color};">{pct:.0f}%</div>
-                </div>
-                <div style="color: #8888a0; font-size: 0.9em;">{current} / {target} {goal['unit']}</div>
-                <div style="background: #f0e8f5; height: 10px; border-radius: 5px; overflow: hidden; margin-top: 8px;">
-                    <div style="background: {color}; height: 100%; width: {pct}%;"></div>
-                </div>
+            <div style="background: linear-gradient(135deg, #fce4ec, #f3e5f5);
+                        padding: 32px; border-radius: 20px; text-align: center;
+                        box-shadow: 0 8px 24px rgba(233,30,99,0.15); margin-bottom: 16px;">
+                <div style="font-size: 6em; line-height: 1;">{data['emoji']}</div>
+                <h2 style="margin: 16px 0 8px 0; color: #e91e63 !important;">
+                    الأسبوع {data['shown_week']}
+                </h2>
+                <p style="font-size: 1.3em; color: #4a4a68; margin: 8px 0;">
+                    حجم {data['size_ar']}
+                </p>
+                <p style="color: #8888a0; font-size: 0.95em;">{data['size_en']}</p>
             </div>
             """, unsafe_allow_html=True)
 
             c1, c2 = st.columns(2)
             with c1:
-                if st.button("➕", key=f"add_{key}", use_container_width=True):
-                    progress[key] = min(target, current + goal["step"])
-                    st.session_state.goals_progress[today] = progress
-                    st.rerun()
+                st.metric("📏 الطول", f"{data['length_cm']} cm")
             with c2:
-                if st.button("➖", key=f"sub_{key}", use_container_width=True):
-                    progress[key] = max(0, current - goal["step"])
-                    st.session_state.goals_progress[today] = progress
+                st.metric("⚖️ الوزن", f"{data['weight_g']} g")
+
+        st.divider()
+        st.markdown(f"### 📖 تطور الجنين في الأسبوع {data['shown_week']}")
+        st.info(data['dev_ar'])
+
+        st.markdown(f"### 💡 نصيحة للأسبوع {data['shown_week']}")
+        st.success(data['tip_ar'])
+
+        st.divider()
+        if st.button(f"💬 اسألي أمينة عن الأسبوع {data['shown_week']}", type="primary", use_container_width=True, key="ask_fetus"):
+            q = f"ماذا يحدث في الأسبوع {data['shown_week']} من الحمل؟"
+            st.session_state.messages.append({"role": "user", "content": q})
+            st.session_state.pending_question = q
+            st.rerun()
+
+    # ============ Tab 3: الوصفات ============
+
+    # ─── 💊 الصحة (كان tab4) ───
+    with sub_health[1]:
+        st.markdown("## 💊 الصحة اليومية")
+        st.caption("فيتامينات + تمارين تنفس")
+
+        from data.vitamins import get_vitamins_for_week
+        from datetime import datetime
+
+        if "lmp_date" not in st.session_state:
+            st.session_state.lmp_date = "2026-06-01"
+
+        try:
+            from src.tools import calculate_pregnancy_week
+            week_info = json.loads(calculate_pregnancy_week(st.session_state.lmp_date))
+            current_week = week_info["weeks"]
+        except Exception:
+            current_week = 20
+
+        st.info(f"📅 بناءً على أسبوعك الحالي ({current_week})")
+
+        vitamins = get_vitamins_for_week(current_week)
+        today = datetime.now().strftime("%Y-%m-%d")
+        if "vitamins_taken" not in st.session_state:
+            st.session_state.vitamins_taken = {}
+        if today not in st.session_state.vitamins_taken:
+            st.session_state.vitamins_taken[today] = []
+
+        cols = st.columns(2)
+        for i, v in enumerate(vitamins):
+            taken = v["name"] in st.session_state.vitamins_taken[today]
+            with cols[i % 2]:
+                border = "#4caf50" if taken else "#e91e63"
+                bg = "#e8f5e9" if taken else "#ffffff"
+                st.markdown(f"""
+                <div style="background: {bg}; padding: 16px; border-radius: 14px;
+                            border-right: 4px solid {border}; margin: 8px 0;
+                            box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                    <div style="font-size: 1.8em;">{v['emoji']}</div>
+                    <div style="font-weight: 700; color: #1a1a2e; margin-top: 4px;">{v['name']}</div>
+                    <div style="color: #e91e63; font-weight: 600;">{v['dose']}</div>
+                    <div style="color: #8888a0; font-size: 0.85em;">⏰ {v['when']}</div>
+                    <div style="color: #4a4a68; font-size: 0.85em;">💚 {v['why']}</div>
+                </div>
+                """, unsafe_allow_html=True)
+                if st.button("✅ تم" if taken else "☐ لم يتناول", key=f"vit_{v['name']}_{today}", use_container_width=True):
+                    if taken:
+                        st.session_state.vitamins_taken[today].remove(v["name"])
+                    else:
+                        st.session_state.vitamins_taken[today].append(v["name"])
                     st.rerun()
 
-    st.divider()
-    completed = sum(1 for k, g in GOALS.items() if progress.get(k, 0) >= g["target"])
-    st.metric("الأهداف المكتملة", f"{completed} / {len(GOALS)}")
-    if completed == len(GOALS):
-        st.balloons()
-        st.success("🎉 ممتاز!")
+        st.divider()
+        st.markdown("### 🧘 تمارين التنفس")
 
-# ============ Tab 6: الدورات ============
-with tab6:
-    st.markdown("## 🎓 دورات تعليمية")
-    st.caption("كل ما تحتاجين معرفته عن الحمل")
+        from data.breathing import BREATHING_EXERCISES
+        for i, ex in enumerate(BREATHING_EXERCISES):
+            with st.expander(f"{ex['emoji']} **{ex['name']}**", expanded=(i == 0)):
+                st.markdown(f"**💚** {ex['benefit']}")
+                for j, step in enumerate(ex['steps'], 1):
+                    st.markdown(f"{j}. {step}")
 
-    from data.courses import get_all_courses
-    courses = get_all_courses()
+    # ============ Tab 5: الأهداف ============
 
-    course_keys = list(courses.keys())
-    course_titles = [courses[k]["title"] for k in course_keys]
+    # ─── 📸 السونار (كان tab8) ───
+    with sub_health[2]:
+        st.markdown("## 📸 ألبوم صور السونار")
+        st.caption("احفظي ذكريات رحلة حملك")
 
-    selected_idx = st.radio(
-        "🎯 اختاري الدورة:",
-        range(len(course_keys)),
-        format_func=lambda i: course_titles[i],
-        key="course_select",
-        horizontal=False,
-        label_visibility="collapsed"
-    )
+        from datetime import datetime as _dt_us
 
-    selected_key = course_keys[selected_idx]
-    course = courses[selected_key]
+        user_dir = f"notes/users/{st.session_state.logged_in_user}/ultrasounds"
+        os.makedirs(user_dir, exist_ok=True)
 
-    st.markdown(f"## {course['title']}")
-    st.divider()
+        st.markdown("### 📤 ارفعي صورة جديدة")
+        col1, col2 = st.columns([2, 1])
+        with col1:
+            uploaded = st.file_uploader("اختاري صورة", type=["jpg", "jpeg", "png", "webp"], key="ultrasound_upload")
+        with col2:
+            us_week = st.number_input("الأسبوع", 4, 40, 20, key="us_week")
+            us_note = st.text_input("ملاحظة", key="us_note")
 
-    for i, topic in enumerate(course["topics"]):
-        with st.expander(f"{topic['icon']} **{topic['name']}**", expanded=(i == 0)):
-            st.info(topic['content'])
-            if st.button(f"💬 اسألي أمينة عن هذا", key=f"ask_course_{selected_key}_{i}", use_container_width=True):
-                q = f"أخبريني المزيد عن: {topic['name']}"
-                st.session_state.messages.append({"role": "user", "content": q})
-                st.session_state.pending_question = q
-                st.rerun()
+        if uploaded is not None:
+            if st.button("💾 احفظي", type="primary", key="save_us"):
+                try:
+                    ext = uploaded.name.split(".")[-1].lower()
+                    fname = f"week_{us_week}_{_dt_us.now().strftime('%Y%m%d-%H%M%S')}.{ext}"
+                    path = os.path.join(user_dir, fname)
+                    with open(path, "wb") as f:
+                        f.write(uploaded.getbuffer())
+                    meta_file = os.path.join(user_dir, "metadata.json")
+                    meta = {}
+                    if os.path.exists(meta_file):
+                        with open(meta_file, "r", encoding="utf-8") as f:
+                            meta = json.load(f)
+                    meta[fname] = {"week": us_week, "note": us_note, "date": _dt_us.now().strftime("%Y-%m-%d %H:%M")}
+                    with open(meta_file, "w", encoding="utf-8") as f:
+                        json.dump(meta, f, ensure_ascii=False, indent=2)
+                    st.success("✅ تم الحفظ")
+                    st.balloons()
+                    st.rerun()
+                except Exception as e:
+                    st.error(f"خطأ: {e}")
 
-# ============ Tab 7: شاركي ============
-with tab7:
-    st.markdown("## 🤝 شاركي مع العائلة")
-    st.caption("شاركي بيانات حملك مع الزوج أو العائلة")
+        st.divider()
+        st.markdown("### 📚 ألبومك")
 
-    from datetime import datetime as _dt_share
+        meta_file = os.path.join(user_dir, "metadata.json")
+        meta = {}
+        if os.path.exists(meta_file):
+            with open(meta_file, "r", encoding="utf-8") as f:
+                meta = json.load(f)
 
-    user_dir = f"notes/users/{st.session_state.logged_in_user}"
-    share_file = os.path.join(user_dir, "share_settings.json")
+        images = sorted([f for f in os.listdir(user_dir) if f.lower().endswith(("jpg", "jpeg", "png", "webp"))], reverse=True)
 
-    settings = {"enabled": False, "share_code": "", "partner_name": ""}
-    if os.path.exists(share_file):
-        with open(share_file, "r", encoding="utf-8") as f:
-            settings = json.load(f)
+        if not images:
+            st.info("📭 لا صور بعد")
+        else:
+            cols = st.columns(3)
+            for i, img in enumerate(images):
+                with cols[i % 3]:
+                    info = meta.get(img, {})
+                    st.image(os.path.join(user_dir, img), use_container_width=True)
+                    st.caption(f"**أسبوع {info.get('week', '?')}** — {info.get('date', '')[:10]}")
+                    if st.button(f"🗑️", key=f"del_us_{img}", use_container_width=True):
+                        os.remove(os.path.join(user_dir, img))
+                        if img in meta:
+                            del meta[img]
+                            with open(meta_file, "w", encoding="utf-8") as f:
+                                json.dump(meta, f, ensure_ascii=False, indent=2)
+                        st.rerun()
 
-    import hashlib
-    if not settings.get("share_code"):
-        settings["share_code"] = hashlib.md5(st.session_state.logged_in_user.encode()).hexdigest()[:8].upper()
+    # ============ Tab 9: رسائل ============
 
-    st.markdown("### ⚙️ إعدادات المشاركة")
-    settings["enabled"] = st.checkbox("تفعيل المشاركة", value=settings.get("enabled", False), key="share_enabled")
-    settings["partner_name"] = st.text_input("اسم الشريك", value=settings.get("partner_name", ""), key="partner_name_input")
+    # ─── ⚖️ القياسات (كان tab12) ───
+    with sub_health[3]:
+        st.markdown("## ⚖️ تسجيل القياسات")
+        st.caption("سجّلي وزنك وضغطك")
 
-    if st.button("💾 احفظي الإعدادات", type="primary"):
-        with open(share_file, "w", encoding="utf-8") as f:
-            json.dump(settings, f, ensure_ascii=False, indent=2)
-        st.success("✅ تم الحفظ")
-        st.rerun()
+        c1, c2, c3 = st.columns(3)
+        with c1:
+            w = st.number_input("⚖️ الوزن (kg)", 30.0, 150.0, 65.0, 0.1, key="w_m")
+        with c2:
+            s = st.number_input("🩺 الانقباضي", 70, 200, 120, key="s_m")
+        with c3:
+            d = st.number_input("🩺 الانبساطي", 40, 130, 80, key="d_m")
+        note = st.text_input("📝 ملاحظة", key="n_m")
 
-    st.divider()
-    st.markdown("### 🔑 رمز المشاركة")
-    st.markdown(f"""
-    <div style="background: linear-gradient(135deg, #e91e63, #9c27b0);
-                padding: 28px; border-radius: 20px; text-align: center; color: white;">
-        <div style="font-size: 0.95em; opacity: 0.9;">شاركي هذا الرمز</div>
-        <div style="font-size: 3em; font-weight: 800; letter-spacing: 8px; margin: 16px 0;">
-            {settings['share_code']}
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+        if st.button("✅ سجّلي", type="primary", use_container_width=True, key="log_m"):
+            from src.tools import log_measurement
+            st.success(log_measurement(weight_kg=w, bp_systolic=s, bp_diastolic=d, note=note))
 
-    st.divider()
-    st.warning("🔒 الشريك يرى فقط: الأسبوع، المرحلة، موعد الولادة")
+        st.divider()
+        st.markdown("### 📋 آخر القياسات")
+        from src.tools import get_measurements
+        st.text(get_measurements())
 
-# ============ Tab 8: السونار ============
-with tab8:
-    st.markdown("## 📸 ألبوم صور السونار")
-    st.caption("احفظي ذكريات رحلة حملك")
-
-    from datetime import datetime as _dt_us
-
-    user_dir = f"notes/users/{st.session_state.logged_in_user}/ultrasounds"
-    os.makedirs(user_dir, exist_ok=True)
-
-    st.markdown("### 📤 ارفعي صورة جديدة")
-    col1, col2 = st.columns([2, 1])
-    with col1:
-        uploaded = st.file_uploader("اختاري صورة", type=["jpg", "jpeg", "png", "webp"], key="ultrasound_upload")
-    with col2:
-        us_week = st.number_input("الأسبوع", 4, 40, 20, key="us_week")
-        us_note = st.text_input("ملاحظة", key="us_note")
-
-    if uploaded is not None:
-        if st.button("💾 احفظي", type="primary", key="save_us"):
+        st.divider()
+        st.markdown("### 📄 تقرير للطبيب")
+        pn = st.text_input("اسمك", key="pn_m")
+        pl = st.text_input("آخر دورة YYYY-MM-DD", key="pl_m", placeholder="2026-06-01")
+        if st.button("📄 توليد", type="primary", use_container_width=True, key="rep_m"):
             try:
-                ext = uploaded.name.split(".")[-1].lower()
-                fname = f"week_{us_week}_{_dt_us.now().strftime('%Y%m%d-%H%M%S')}.{ext}"
-                path = os.path.join(user_dir, fname)
-                with open(path, "wb") as f:
-                    f.write(uploaded.getbuffer())
-                meta_file = os.path.join(user_dir, "metadata.json")
-                meta = {}
-                if os.path.exists(meta_file):
-                    with open(meta_file, "r", encoding="utf-8") as f:
-                        meta = json.load(f)
-                meta[fname] = {"week": us_week, "note": us_note, "date": _dt_us.now().strftime("%Y-%m-%d %H:%M")}
-                with open(meta_file, "w", encoding="utf-8") as f:
-                    json.dump(meta, f, ensure_ascii=False, indent=2)
-                st.success("✅ تم الحفظ")
-                st.balloons()
-                st.rerun()
+                from src.tools import calculate_pregnancy_week, _load_json
+                from datetime import datetime as _dt
+                L = ["=" * 40, "تقرير متابعة الحمل", "=" * 40, f"التاريخ: {_dt.now().strftime('%Y-%m-%d %H:%M')}"]
+                if pn:
+                    L.append(f"الاسم: {pn}")
+                if pl:
+                    info = json.loads(calculate_pregnancy_week(pl))
+                    L += ["", f"الأسبوع: {info['display_ar']}", f"الولادة: {info['due_date']}"]
+                m = _load_json("measurements.json")
+                if m:
+                    L.append("\n--- القياسات ---")
+                    cnt = 0
+                    for dt in sorted(m.keys(), reverse=True):
+                        for e in m[dt]:
+                            if cnt >= 10: break
+                            L.append(f"{dt} {e.get('time','')} | {e.get('weight','-')}kg | {e.get('bp','-')}")
+                            cnt += 1
+                L.append("\n⚕️ تثقيفي فقط")
+                txt = "\n".join(L)
+                st.success("✅ جاهز")
+                st.download_button("⬇️ تحميل", txt.encode("utf-8"), f"تقرير-{_dt.now().strftime('%Y%m%d')}.txt", "text/plain", key="dl_m")
             except Exception as e:
                 st.error(f"خطأ: {e}")
 
-    st.divider()
-    st.markdown("### 📚 ألبومك")
+    # ============ Tab 13: السجل ============
 
-    meta_file = os.path.join(user_dir, "metadata.json")
-    meta = {}
-    if os.path.exists(meta_file):
-        with open(meta_file, "r", encoding="utf-8") as f:
-            meta = json.load(f)
+    # ─── 📊 السجل (كان tab13) ───
+    with sub_health[4]:
+        st.markdown("## 📊 سجل القياسات")
+        from src.tools import _load_json
+        data = _load_json("measurements.json")
+        ws, ss = [], []
 
-    images = sorted([f for f in os.listdir(user_dir) if f.lower().endswith(("jpg", "jpeg", "png", "webp"))], reverse=True)
-
-    if not images:
-        st.info("📭 لا صور بعد")
-    else:
-        cols = st.columns(3)
-        for i, img in enumerate(images):
-            with cols[i % 3]:
-                info = meta.get(img, {})
-                st.image(os.path.join(user_dir, img), use_container_width=True)
-                st.caption(f"**أسبوع {info.get('week', '?')}** — {info.get('date', '')[:10]}")
-                if st.button(f"🗑️", key=f"del_us_{img}", use_container_width=True):
-                    os.remove(os.path.join(user_dir, img))
-                    if img in meta:
-                        del meta[img]
-                        with open(meta_file, "w", encoding="utf-8") as f:
-                            json.dump(meta, f, ensure_ascii=False, indent=2)
-                    st.rerun()
-
-# ============ Tab 9: رسائل ============
-with tab9:
-    st.markdown("## 💌 رسائل لجنينك")
-    st.caption("اكتبي رسائل مؤثرة")
-
-    from datetime import datetime as _dt_let
-
-    user_dir = f"notes/users/{st.session_state.logged_in_user}/letters"
-    os.makedirs(user_dir, exist_ok=True)
-    letters_file = os.path.join(user_dir, "letters.json")
-
-    letters = []
-    if os.path.exists(letters_file):
-        with open(letters_file, "r", encoding="utf-8") as f:
-            letters = json.load(f)
-
-    st.markdown("### ✍️ اكتبي رسالة")
-    new_letter = st.text_area("رسالتك:", height=150, placeholder="عزيزي طفلي...", key="new_letter")
-    letter_week = st.number_input("أسبوعك", 4, 40, 20, key="letter_week")
-
-    if st.button("💾 احفظي", type="primary", key="save_letter"):
-        if new_letter.strip():
-            letters.append({"week": letter_week, "date": _dt_let.now().strftime("%Y-%m-%d %H:%M"), "text": new_letter.strip()})
-            with open(letters_file, "w", encoding="utf-8") as f:
-                json.dump(letters, f, ensure_ascii=False, indent=2)
-            st.success("💕 تم الحفظ")
-            st.balloons()
-            st.rerun()
+        if not data:
+            st.info("📭 لا قياسات")
         else:
-            st.warning("⚠️ اكتبي رسالة")
+            for dt in sorted(data.keys(), reverse=True):
+                st.markdown(f"##### 📅 {dt}")
+                for e in data[dt]:
+                    line = f"• **{e.get('time','')}** — "
+                    if e.get("weight"):
+                        line += f"وزن: `{e['weight']} kg` • "
+                        ws.append(e["weight"])
+                    if e.get("bp"):
+                        line += f"ضغط: `{e['bp']}`"
+                        if "/" in e["bp"]:
+                            try: ss.append(int(e["bp"].split("/")[0]))
+                            except: pass
+                    if e.get("note"):
+                        line += f" • 📝 {e['note']}"
+                    st.write(line)
 
-    st.divider()
-    st.markdown(f"### 💝 رسائلك ({len(letters)})")
+            st.divider()
+            if len(ws) >= 2:
+                c1, c2, c3 = st.columns(3)
+                with c1:
+                    st.metric("أول وزن", f"{ws[0]:.1f} kg")
+                with c2:
+                    st.metric("آخر وزن", f"{ws[-1]:.1f} kg")
+                with c3:
+                    st.metric("التغير", f"{ws[-1]-ws[0]:+.1f} kg")
 
-    if not letters:
-        st.info("📭 لا رسائل بعد")
-    else:
-        for i, letter in enumerate(reversed(letters)):
-            with st.expander(f"💌 الأسبوع {letter['week']} — {letter['date'][:10]}", expanded=(i == 0)):
-                st.info(f'"{letter["text"]}"')
-                if st.button(f"🗑️ حذف", key=f"del_letter_{i}"):
-                    letters.remove(letter)
-                    with open(letters_file, "w", encoding="utf-8") as f:
-                        json.dump(letters, f, ensure_ascii=False, indent=2)
-                    st.rerun()
+            if ss:
+                avg = sum(ss) / len(ss)
+                high = [x for x in ss if x >= 140]
+                st.write("")
+                if high:
+                    st.error(f"⚠️ لديك {len(high)} قياس ضغط مرتفع")
+                else:
+                    st.info(f"✅ متوسط الضغط: {avg:.0f} — طبيعي")
 
-# ============ Tab 10: الأسماء ============
-with tab10:
-    st.markdown("## 👶 مولّد أسماء")
-    st.caption("اقتراحات أسماء عربية")
+        if len(ws) >= 2:
+            st.divider()
+            st.markdown("### 📈 الرسوم")
+            try:
+                import plotly.graph_objects as go
+                fig1 = go.Figure()
+                fig1.add_trace(go.Scatter(x=list(range(1, len(ws) + 1)), y=ws,
+                    mode="lines+markers", name="الوزن",
+                    line=dict(color="#e91e63", width=3), marker=dict(size=12)))
+                fig1.update_layout(title="⚖️ تطور الوزن", height=350,
+                    plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)")
+                st.plotly_chart(fig1, use_container_width=True)
+            except Exception:
+                pass
 
-    from data.names import BOY_NAMES, GIRL_NAMES, MEANINGS
+    # ============ Tab 14: العدّاد ============
 
-    gender = st.radio("الجنس", ["👦 ولد", "👧 بنت"], horizontal=True, key="name_gender")
-    category = st.selectbox("الفئة", ["تقليدية", "حديثة", "قرآنية"], key="name_cat")
 
-    names = BOY_NAMES.get(category, []) if "👦" in gender else GIRL_NAMES.get(category, [])
+# ════════════ المجموعة 3: 📖 يومياتي ════════════
+with main_tabs[2]:
 
-    if names:
-        st.markdown(f"### ✨ {len(names)} اسم")
+    sub_journal = st.tabs([
+        "💬 المحادثة",
+        "🎯 الأهداف",
+        "💌 رسائل",
+        "📖 يومياتي",
+    ])
+
+    # ─── 💬 المحادثة (كان tab1) ───
+    with sub_journal[0]:
+        def safe_get(msg, key, default=None):
+            return msg.get(key, default) if isinstance(msg, dict) else getattr(msg, key, default)
+
+        for msg in st.session_state.messages:
+            role = safe_get(msg, "role")
+            content = safe_get(msg, "content")
+            if role == "user":
+                with st.chat_message("user", avatar="👤"):
+                    st.write(content)
+            elif role == "assistant" and content:
+                with st.chat_message("assistant", avatar="🤰"):
+                    st.write(content)
+
+        st.markdown("**🎤 الإدخال الصوتي**")
+        st.components.v1.html(get_voice_recorder_html(), height=80)
+        st.markdown("**⌨️ أو اكتبي:**")
+
+        pending = st.session_state.pop("pending_question", None)
+        prompt_value = pending
+
+        p = None
+        if prompt_value:
+            p = prompt_value
+        else:
+            p = st.chat_input("اكتبي سؤالك...")
+
+        if p:
+            with st.chat_message("user", avatar="👤"):
+                st.write(p)
+            st.session_state.messages.append({"role": "user", "content": p})
+            with st.chat_message("assistant", avatar="🤰"):
+                with st.spinner("🤰 أمينة تفكر..."):
+                    try:
+                        ans, used = run_agent(st.session_state.messages)
+                    except Exception as e:
+                        err = str(e)
+                        if "429" in err or "Rate limit" in err:
+                            ans = "⏳ عذراً، وصلنا للحد اليومي. انتظري 10-15 دقيقة."
+                        else:
+                            ans = f"⚠️ خطأ: {err[:200]}"
+                        used = []
+                st.write(ans)
+
+                try:
+                    _audio = text_to_speech(ans)
+                    if _audio:
+                        st.markdown("**🔊 استمعي للرد:**")
+                        st.audio(_audio, format="audio/mp3")
+                except Exception:
+                    pass
+
+                if used:
+                    with st.expander(f"🔧 الأدوات المستخدمة ({len(used)})", expanded=False):
+                        for i, x in enumerate(used, 1):
+                            st.markdown(f"### {i}. {x['name']}")
+
+                            # حاول تفسير JSON
+                            try:
+                                import json as _json
+                                data = _json.loads(x['result'])
+
+                                # عرض حسب النوع
+                                if isinstance(data, dict):
+                                    for key, value in data.items():
+                                        # ترجمة المفاتيح
+                                        key_ar = {
+                                            "week": "📅 الأسبوع",
+                                            "week_range": "📅 نطاق الأسابيع",
+                                            "display_ar": "📅 الأسبوع",
+                                            "display_en": "📅 Week",
+                                            "size_ar": "📏 الحجم",
+                                            "size_en": "📏 Size",
+                                            "len_cm": "📏 الطول (سم)",
+                                            "length_cm": "📏 الطول (سم)",
+                                            "weight_g": "⚖️ الوزن (غرام)",
+                                            "dev_ar": "📖 التطور",
+                                            "dev_en": "📖 Development",
+                                            "tip_ar": "💡 نصيحة",
+                                            "tip_en": "💡 Tip",
+                                            "title_ar": "📌 العنوان",
+                                            "title_en": "📌 Title",
+                                            "tests_ar": "🩺 الفحوصات",
+                                            "tips_ar": "💡 نصائح",
+                                            "danger_ar": "⚠️ تحذير",
+                                            "due_date": "📅 موعد الولادة",
+                                            "days_remaining": "⏳ الأيام المتبقية",
+                                            "trimester": "🌸 المرحلة",
+                                            "action_ar": "⚠️ الإجراء",
+                                            "action_en": "⚠️ Action",
+                                            "level": "🎯 المستوى",
+                                            "matched": "🔍 مطابقة",
+                                            "error": "❌ خطأ",
+                                            "results": "📚 النتائج",
+                                            "source": "📄 المصدر",
+                                            "text": "📝 النص",
+                                            "score": "📊 الصلة",
+                                            "recommendation": "💡 التوصية",
+                                            "count": "🔢 العدد",
+                                            "avg_duration_sec": "⏱️ متوسط المدة (ث)",
+                                            "avg_gap_min": "⏱️ متوسط التباعد (دقيقة)",
+                                            "week_info": "📅 معلومات الأسبوع",
+                                        }.get(key, f"📌 {key}")
+
+                                        # عرض القيم
+                                        if isinstance(value, list):
+                                            st.markdown(f"**{key_ar}:**")
+                                            for item in value:
+                                                st.markdown(f"- {item}")
+                                        elif isinstance(value, dict):
+                                            st.markdown(f"**{key_ar}:**")
+                                            for k2, v2 in value.items():
+                                                st.markdown(f"  - *{k2}*: {v2}")
+                                        else:
+                                            st.markdown(f"**{key_ar}:** {value}")
+
+                                    # إذا كان الكل JSON، اعرضه في expander
+                                    with st.expander("👁️ البيانات الخام"):
+                                        st.json(data)
+                                else:
+                                    st.write(data)
+                            except Exception:
+                                # ليس JSON — عرض كنص
+                                st.info(str(x['result'])[:600])
+
+                            if i < len(used):
+                                st.divider()
+
+            st.session_state.messages.append({"role": "assistant", "content": ans})
+
+    # ============ Tab 2: الجنين ============
+
+    # ─── 🎯 الأهداف (كان tab5) ───
+    with sub_journal[1]:
+        st.markdown("## 🎯 أهدافك الصحية")
+        st.caption("تتبعي تقدمك اليومي")
+
+        from data.goals import GOALS
+        from datetime import datetime
+
+        today = datetime.now().strftime("%Y-%m-%d")
+        if "goals_progress" not in st.session_state:
+            st.session_state.goals_progress = {}
+        if today not in st.session_state.goals_progress:
+            st.session_state.goals_progress[today] = {k: 0 for k in GOALS}
+
+        progress = st.session_state.goals_progress[today]
+
         cols = st.columns(2)
-        for i, n in enumerate(names):
+        for i, (key, goal) in enumerate(GOALS.items()):
+            current = progress.get(key, 0)
+            target = goal["target"]
+            pct = min(100, (current / target) * 100)
+            color = "#4caf50" if pct >= 100 else "#e91e63"
+
             with cols[i % 2]:
-                meaning = MEANINGS.get(n, "—")
                 st.markdown(f"""
-                <div style="background: linear-gradient(135deg, #fff, #fce4ec);
-                            padding: 14px 18px; border-radius: 12px;
-                            border-right: 3px solid #e91e63; margin: 6px 0;">
-                    <div style="font-weight: 700; font-size: 1.15em;">{n}</div>
-                    <div style="color: #8888a0; font-size: 0.9em;">💭 {meaning}</div>
+                <div style="background: white; padding: 18px; border-radius: 14px;
+                            box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin: 8px 0;
+                            border: 1px solid #e8e0ec;">
+                    <div style="display: flex; justify-content: space-between;">
+                        <div style="font-weight: 700; color: #1a1a2e;">{goal['label']}</div>
+                        <div style="font-weight: 800; color: {color};">{pct:.0f}%</div>
+                    </div>
+                    <div style="color: #8888a0; font-size: 0.9em;">{current} / {target} {goal['unit']}</div>
+                    <div style="background: #f0e8f5; height: 10px; border-radius: 5px; overflow: hidden; margin-top: 8px;">
+                        <div style="background: {color}; height: 100%; width: {pct}%;"></div>
+                    </div>
                 </div>
                 """, unsafe_allow_html=True)
 
-    st.divider()
-    st.markdown("### ⭐ المفضلة")
-    if "fav_names" not in st.session_state:
-        st.session_state.fav_names = []
+                c1, c2 = st.columns(2)
+                with c1:
+                    if st.button("➕", key=f"add_{key}", use_container_width=True):
+                        progress[key] = min(target, current + goal["step"])
+                        st.session_state.goals_progress[today] = progress
+                        st.rerun()
+                with c2:
+                    if st.button("➖", key=f"sub_{key}", use_container_width=True):
+                        progress[key] = max(0, current - goal["step"])
+                        st.session_state.goals_progress[today] = progress
+                        st.rerun()
 
-    fav_input = st.text_input("أضيفي اسماً", key="fav_input", placeholder="مثال: مريم")
-    if st.button("➕ إضافة", key="add_fav"):
-        if fav_input.strip() and fav_input not in st.session_state.fav_names:
-            st.session_state.fav_names.append(fav_input.strip())
+        st.divider()
+        completed = sum(1 for k, g in GOALS.items() if progress.get(k, 0) >= g["target"])
+        st.metric("الأهداف المكتملة", f"{completed} / {len(GOALS)}")
+        if completed == len(GOALS):
+            st.balloons()
+            st.success("🎉 ممتاز!")
+
+    # ============ Tab 6: الدورات ============
+
+    # ─── 💌 رسائل (كان tab9) ───
+    with sub_journal[2]:
+        st.markdown("## 💌 رسائل لجنينك")
+        st.caption("اكتبي رسائل مؤثرة")
+
+        from datetime import datetime as _dt_let
+
+        user_dir = f"notes/users/{st.session_state.logged_in_user}/letters"
+        os.makedirs(user_dir, exist_ok=True)
+        letters_file = os.path.join(user_dir, "letters.json")
+
+        letters = []
+        if os.path.exists(letters_file):
+            with open(letters_file, "r", encoding="utf-8") as f:
+                letters = json.load(f)
+
+        st.markdown("### ✍️ اكتبي رسالة")
+        new_letter = st.text_area("رسالتك:", height=150, placeholder="عزيزي طفلي...", key="new_letter")
+        letter_week = st.number_input("أسبوعك", 4, 40, 20, key="letter_week")
+
+        if st.button("💾 احفظي", type="primary", key="save_letter"):
+            if new_letter.strip():
+                letters.append({"week": letter_week, "date": _dt_let.now().strftime("%Y-%m-%d %H:%M"), "text": new_letter.strip()})
+                with open(letters_file, "w", encoding="utf-8") as f:
+                    json.dump(letters, f, ensure_ascii=False, indent=2)
+                st.success("💕 تم الحفظ")
+                st.balloons()
+                st.rerun()
+            else:
+                st.warning("⚠️ اكتبي رسالة")
+
+        st.divider()
+        st.markdown(f"### 💝 رسائلك ({len(letters)})")
+
+        if not letters:
+            st.info("📭 لا رسائل بعد")
+        else:
+            for i, letter in enumerate(reversed(letters)):
+                with st.expander(f"💌 الأسبوع {letter['week']} — {letter['date'][:10]}", expanded=(i == 0)):
+                    st.info(f'"{letter["text"]}"')
+                    if st.button(f"🗑️ حذف", key=f"del_letter_{i}"):
+                        letters.remove(letter)
+                        with open(letters_file, "w", encoding="utf-8") as f:
+                            json.dump(letters, f, ensure_ascii=False, indent=2)
+                        st.rerun()
+
+    # ============ Tab 10: الأسماء ============
+
+    # ─── 📖 يومياتي (كان tab11) ───
+    with sub_journal[3]:
+        st.markdown("## 📖 يوميات الحمل")
+        st.caption("سجّلي مشاعرك اليومية")
+
+        from datetime import datetime as _dt_j
+
+        user_dir = f"notes/users/{st.session_state.logged_in_user}/journal"
+        os.makedirs(user_dir, exist_ok=True)
+        journal_file = os.path.join(user_dir, "entries.json")
+
+        entries = []
+        if os.path.exists(journal_file):
+            with open(journal_file, "r", encoding="utf-8") as f:
+                entries = json.load(f)
+
+        st.markdown("### ✍️ يومية جديدة")
+
+        from data.journal import JOURNAL_PROMPTS, MOODS
+
+        st.markdown("**😊 مزاجك اليوم؟**")
+        mood_cols = st.columns(8)
+        if "selected_mood" not in st.session_state:
+            st.session_state.selected_mood = MOODS[0]
+
+        for i, (emoji, label) in enumerate(MOODS):
+            with mood_cols[i]:
+                if st.button(f"{emoji}", key=f"mood_{i}", use_container_width=True):
+                    st.session_state.selected_mood = (emoji, label)
+                    st.rerun()
+
+        st.caption(f"مزاجك: {st.session_state.selected_mood[0]} {st.session_state.selected_mood[1]}")
+
+        import random
+        if "journal_prompt" not in st.session_state:
+            st.session_state.journal_prompt = random.choice(JOURNAL_PROMPTS)
+
+        if st.button("🎲 سؤال آخر", key="new_prompt"):
+            st.session_state.journal_prompt = random.choice(JOURNAL_PROMPTS)
             st.rerun()
 
-    if st.session_state.fav_names:
-        cols = st.columns(3)
-        for i, n in enumerate(st.session_state.fav_names):
-            with cols[i % 3]:
-                st.success(f"⭐ {n}")
-                if st.button("❌", key=f"rm_fav_{n}"):
-                    st.session_state.fav_names.remove(n)
+        st.info(f"💡 {st.session_state.journal_prompt}")
+        entry_text = st.text_area("اكتبي هنا:", height=150, key="journal_text")
+
+        if st.button("💾 احفظي", type="primary", key="save_journal"):
+            if entry_text.strip():
+                entries.append({
+                    "date": _dt_j.now().strftime("%Y-%m-%d %H:%M"),
+                    "mood": st.session_state.selected_mood,
+                    "prompt": st.session_state.journal_prompt,
+                    "text": entry_text.strip(),
+                })
+                with open(journal_file, "w", encoding="utf-8") as f:
+                    json.dump(entries, f, ensure_ascii=False, indent=2)
+                st.success("📖 تم الحفظ")
+                st.balloons()
+                st.rerun()
+            else:
+                st.warning("⚠️ اكتبي شيئاً")
+
+        st.divider()
+        st.markdown(f"### 📚 يومياتك ({len(entries)})")
+
+        if not entries:
+            st.info("📭 لا يوميات بعد")
+        else:
+            for i, entry in enumerate(reversed(entries)):
+                mood_emoji = entry.get("mood", ["😐", "عادية"])[0]
+                mood_label = entry.get("mood", ["😐", "عادية"])[1]
+                with st.expander(f"{mood_emoji} {entry['date'][:10]} — {mood_label}", expanded=(i == 0)):
+                    if entry.get("prompt"):
+                        st.caption(f"💭 {entry['prompt']}")
+                    st.info(entry['text'])
+                    if st.button(f"🗑️ حذف", key=f"del_j_{i}"):
+                        entries.remove(entry)
+                        with open(journal_file, "w", encoding="utf-8") as f:
+                            json.dump(entries, f, ensure_ascii=False, indent=2)
+                        st.rerun()
+
+    # ============ Tab 12: القياسات ============
+
+
+# ════════════ المجموعة 4: 🍎 تغذيتي والمزيد ════════════
+with main_tabs[3]:
+
+    sub_food = st.tabs([
+        "🍎 الوصفات",
+        "🎓 الدورات",
+        "👶 الأسماء",
+        "🎂 العدّاد",
+    ])
+
+    # ─── 🍎 الوصفات (كان tab3) ───
+    with sub_food[0]:
+        st.markdown("## 🍎 وصفات طعام للحمل")
+        st.caption("وصفات مقسمة حسب حاجتك")
+
+        from data.recipes import get_recipe_categories, get_category_recipes
+
+        categories = get_recipe_categories()
+        cat_names = {k: v for k, v in categories}
+
+        selected_cat = st.selectbox(
+            "🎯 اختاري الفئة:",
+            list(cat_names.keys()),
+            format_func=lambda x: cat_names[x],
+            key="recipe_cat_v3"
+        )
+
+        if selected_cat:
+            cat_data = get_category_recipes(selected_cat)
+            st.markdown(f"### {cat_data['title']}")
+            st.caption(cat_data['description'])
+            for i, recipe in enumerate(cat_data["recipes"]):
+                with st.expander(f"🍽️ **{recipe['name']}** — ⏱️ {recipe['time']}", expanded=(i == 0)):
+                    c1, c2 = st.columns(2)
+                    with c1:
+                        st.markdown("**🛒 المكونات:**")
+                        for ing in recipe["ingredients"]:
+                            st.markdown(f"- {ing}")
+                    with c2:
+                        st.markdown("**👩‍🍳 التحضير:**")
+                        for j, step in enumerate(recipe["steps"], 1):
+                            st.markdown(f"{j}. {step}")
+                    st.success(f"💚 **الفوائد:** {recipe['benefits']}")
+
+        st.divider()
+        if st.button("💬 اسألي أمينة عن التغذية", type="primary", use_container_width=True, key="ask_recipes_v3"):
+            q = "ما الأطعمة المهمة في الحمل؟ وما الأطعمة الممنوعة؟"
+            st.session_state.messages.append({"role": "user", "content": q})
+            st.session_state.pending_question = q
+            st.rerun()
+
+    # ============ Tab 4: الصحة ============
+
+    # ─── 🎓 الدورات (كان tab6) ───
+    with sub_food[1]:
+        st.markdown("## 🎓 دورات تعليمية")
+        st.caption("كل ما تحتاجين معرفته عن الحمل")
+
+        from data.courses import get_all_courses
+        courses = get_all_courses()
+
+        course_keys = list(courses.keys())
+        course_titles = [courses[k]["title"] for k in course_keys]
+
+        selected_idx = st.radio(
+            "🎯 اختاري الدورة:",
+            range(len(course_keys)),
+            format_func=lambda i: course_titles[i],
+            key="course_select",
+            horizontal=False,
+            label_visibility="collapsed"
+        )
+
+        selected_key = course_keys[selected_idx]
+        course = courses[selected_key]
+
+        st.markdown(f"## {course['title']}")
+        st.divider()
+
+        for i, topic in enumerate(course["topics"]):
+            with st.expander(f"{topic['icon']} **{topic['name']}**", expanded=(i == 0)):
+                st.info(topic['content'])
+                if st.button(f"💬 اسألي أمينة عن هذا", key=f"ask_course_{selected_key}_{i}", use_container_width=True):
+                    q = f"أخبريني المزيد عن: {topic['name']}"
+                    st.session_state.messages.append({"role": "user", "content": q})
+                    st.session_state.pending_question = q
                     st.rerun()
-    else:
-        st.info("⭐ لم تضيفي أسماء بعد")
 
-# ============ Tab 11: يومياتي ============
-with tab11:
-    st.markdown("## 📖 يوميات الحمل")
-    st.caption("سجّلي مشاعرك اليومية")
+    # ============ Tab 7: شاركي ============
 
-    from datetime import datetime as _dt_j
+    # ─── 👶 الأسماء (كان tab10) ───
+    with sub_food[2]:
+        st.markdown("## 👶 مولّد أسماء")
+        st.caption("اقتراحات أسماء عربية")
 
-    user_dir = f"notes/users/{st.session_state.logged_in_user}/journal"
-    os.makedirs(user_dir, exist_ok=True)
-    journal_file = os.path.join(user_dir, "entries.json")
+        from data.names import BOY_NAMES, GIRL_NAMES, MEANINGS
 
-    entries = []
-    if os.path.exists(journal_file):
-        with open(journal_file, "r", encoding="utf-8") as f:
-            entries = json.load(f)
+        gender = st.radio("الجنس", ["👦 ولد", "👧 بنت"], horizontal=True, key="name_gender")
+        category = st.selectbox("الفئة", ["تقليدية", "حديثة", "قرآنية"], key="name_cat")
 
-    st.markdown("### ✍️ يومية جديدة")
+        names = BOY_NAMES.get(category, []) if "👦" in gender else GIRL_NAMES.get(category, [])
 
-    from data.journal import JOURNAL_PROMPTS, MOODS
+        if names:
+            st.markdown(f"### ✨ {len(names)} اسم")
+            cols = st.columns(2)
+            for i, n in enumerate(names):
+                with cols[i % 2]:
+                    meaning = MEANINGS.get(n, "—")
+                    st.markdown(f"""
+                    <div style="background: linear-gradient(135deg, #fff, #fce4ec);
+                                padding: 14px 18px; border-radius: 12px;
+                                border-right: 3px solid #e91e63; margin: 6px 0;">
+                        <div style="font-weight: 700; font-size: 1.15em;">{n}</div>
+                        <div style="color: #8888a0; font-size: 0.9em;">💭 {meaning}</div>
+                    </div>
+                    """, unsafe_allow_html=True)
 
-    st.markdown("**😊 مزاجك اليوم؟**")
-    mood_cols = st.columns(8)
-    if "selected_mood" not in st.session_state:
-        st.session_state.selected_mood = MOODS[0]
+        st.divider()
+        st.markdown("### ⭐ المفضلة")
+        if "fav_names" not in st.session_state:
+            st.session_state.fav_names = []
 
-    for i, (emoji, label) in enumerate(MOODS):
-        with mood_cols[i]:
-            if st.button(f"{emoji}", key=f"mood_{i}", use_container_width=True):
-                st.session_state.selected_mood = (emoji, label)
+        fav_input = st.text_input("أضيفي اسماً", key="fav_input", placeholder="مثال: مريم")
+        if st.button("➕ إضافة", key="add_fav"):
+            if fav_input.strip() and fav_input not in st.session_state.fav_names:
+                st.session_state.fav_names.append(fav_input.strip())
                 st.rerun()
 
-    st.caption(f"مزاجك: {st.session_state.selected_mood[0]} {st.session_state.selected_mood[1]}")
-
-    import random
-    if "journal_prompt" not in st.session_state:
-        st.session_state.journal_prompt = random.choice(JOURNAL_PROMPTS)
-
-    if st.button("🎲 سؤال آخر", key="new_prompt"):
-        st.session_state.journal_prompt = random.choice(JOURNAL_PROMPTS)
-        st.rerun()
-
-    st.info(f"💡 {st.session_state.journal_prompt}")
-    entry_text = st.text_area("اكتبي هنا:", height=150, key="journal_text")
-
-    if st.button("💾 احفظي", type="primary", key="save_journal"):
-        if entry_text.strip():
-            entries.append({
-                "date": _dt_j.now().strftime("%Y-%m-%d %H:%M"),
-                "mood": st.session_state.selected_mood,
-                "prompt": st.session_state.journal_prompt,
-                "text": entry_text.strip(),
-            })
-            with open(journal_file, "w", encoding="utf-8") as f:
-                json.dump(entries, f, ensure_ascii=False, indent=2)
-            st.success("📖 تم الحفظ")
-            st.balloons()
-            st.rerun()
+        if st.session_state.fav_names:
+            cols = st.columns(3)
+            for i, n in enumerate(st.session_state.fav_names):
+                with cols[i % 3]:
+                    st.success(f"⭐ {n}")
+                    if st.button("❌", key=f"rm_fav_{n}"):
+                        st.session_state.fav_names.remove(n)
+                        st.rerun()
         else:
-            st.warning("⚠️ اكتبي شيئاً")
+            st.info("⭐ لم تضيفي أسماء بعد")
 
-    st.divider()
-    st.markdown(f"### 📚 يومياتك ({len(entries)})")
+    # ============ Tab 11: يومياتي ============
 
-    if not entries:
-        st.info("📭 لا يوميات بعد")
-    else:
-        for i, entry in enumerate(reversed(entries)):
-            mood_emoji = entry.get("mood", ["😐", "عادية"])[0]
-            mood_label = entry.get("mood", ["😐", "عادية"])[1]
-            with st.expander(f"{mood_emoji} {entry['date'][:10]} — {mood_label}", expanded=(i == 0)):
-                if entry.get("prompt"):
-                    st.caption(f"💭 {entry['prompt']}")
-                st.info(entry['text'])
-                if st.button(f"🗑️ حذف", key=f"del_j_{i}"):
-                    entries.remove(entry)
-                    with open(journal_file, "w", encoding="utf-8") as f:
-                        json.dump(entries, f, ensure_ascii=False, indent=2)
-                    st.rerun()
+    # ─── 🎂 العدّاد (كان tab14) ───
+    with sub_food[3]:
+        st.markdown("## 🎂 العدّاد التنازلي")
+        st.caption("تابعي رحلتك أسبوعاً بأسبوع")
 
-# ============ Tab 12: القياسات ============
-with tab12:
-    st.markdown("## ⚖️ تسجيل القياسات")
-    st.caption("سجّلي وزنك وضغطك")
+        if "lmp_date" not in st.session_state:
+            st.session_state.lmp_date = "2026-06-01"
 
-    c1, c2, c3 = st.columns(3)
-    with c1:
-        w = st.number_input("⚖️ الوزن (kg)", 30.0, 150.0, 65.0, 0.1, key="w_m")
-    with c2:
-        s = st.number_input("🩺 الانقباضي", 70, 200, 120, key="s_m")
-    with c3:
-        d = st.number_input("🩺 الانبساطي", 40, 130, 80, key="d_m")
-    note = st.text_input("📝 ملاحظة", key="n_m")
+        st.markdown("**📅 تاريخ آخر دورة (LMP)**")
+        lmp_input = st.text_input("YYYY-MM-DD", value=st.session_state.lmp_date, key="lmp_countdown", label_visibility="collapsed")
+        if lmp_input != st.session_state.lmp_date:
+            st.session_state.lmp_date = lmp_input
 
-    if st.button("✅ سجّلي", type="primary", use_container_width=True, key="log_m"):
-        from src.tools import log_measurement
-        st.success(log_measurement(weight_kg=w, bp_systolic=s, bp_diastolic=d, note=note))
-
-    st.divider()
-    st.markdown("### 📋 آخر القياسات")
-    from src.tools import get_measurements
-    st.text(get_measurements())
-
-    st.divider()
-    st.markdown("### 📄 تقرير للطبيب")
-    pn = st.text_input("اسمك", key="pn_m")
-    pl = st.text_input("آخر دورة YYYY-MM-DD", key="pl_m", placeholder="2026-06-01")
-    if st.button("📄 توليد", type="primary", use_container_width=True, key="rep_m"):
+        from src.tools import calculate_pregnancy_week
         try:
-            from src.tools import calculate_pregnancy_week, _load_json
-            from datetime import datetime as _dt
-            L = ["=" * 40, "تقرير متابعة الحمل", "=" * 40, f"التاريخ: {_dt.now().strftime('%Y-%m-%d %H:%M')}"]
-            if pn:
-                L.append(f"الاسم: {pn}")
-            if pl:
-                info = json.loads(calculate_pregnancy_week(pl))
-                L += ["", f"الأسبوع: {info['display_ar']}", f"الولادة: {info['due_date']}"]
-            m = _load_json("measurements.json")
-            if m:
-                L.append("\n--- القياسات ---")
-                cnt = 0
-                for dt in sorted(m.keys(), reverse=True):
-                    for e in m[dt]:
-                        if cnt >= 10: break
-                        L.append(f"{dt} {e.get('time','')} | {e.get('weight','-')}kg | {e.get('bp','-')}")
-                        cnt += 1
-            L.append("\n⚕️ تثقيفي فقط")
-            txt = "\n".join(L)
-            st.success("✅ جاهز")
-            st.download_button("⬇️ تحميل", txt.encode("utf-8"), f"تقرير-{_dt.now().strftime('%Y%m%d')}.txt", "text/plain", key="dl_m")
-        except Exception as e:
-            st.error(f"خطأ: {e}")
+            week_info = json.loads(calculate_pregnancy_week(st.session_state.lmp_date))
+            weeks = week_info["weeks"]
+            days_remaining = week_info["days_remaining"]
+            trimester = week_info["trimester"]
+            due_date = week_info["due_date"]
+            progress = min(100, max(0, ((280 - days_remaining) / 280) * 100))
 
-# ============ Tab 13: السجل ============
-with tab13:
-    st.markdown("## 📊 سجل القياسات")
-    from src.tools import _load_json
-    data = _load_json("measurements.json")
-    ws, ss = [], []
-
-    if not data:
-        st.info("📭 لا قياسات")
-    else:
-        for dt in sorted(data.keys(), reverse=True):
-            st.markdown(f"##### 📅 {dt}")
-            for e in data[dt]:
-                line = f"• **{e.get('time','')}** — "
-                if e.get("weight"):
-                    line += f"وزن: `{e['weight']} kg` • "
-                    ws.append(e["weight"])
-                if e.get("bp"):
-                    line += f"ضغط: `{e['bp']}`"
-                    if "/" in e["bp"]:
-                        try: ss.append(int(e["bp"].split("/")[0]))
-                        except: pass
-                if e.get("note"):
-                    line += f" • 📝 {e['note']}"
-                st.write(line)
-
-        st.divider()
-        if len(ws) >= 2:
-            c1, c2, c3 = st.columns(3)
-            with c1:
-                st.metric("أول وزن", f"{ws[0]:.1f} kg")
-            with c2:
-                st.metric("آخر وزن", f"{ws[-1]:.1f} kg")
-            with c3:
-                st.metric("التغير", f"{ws[-1]-ws[0]:+.1f} kg")
-
-        if ss:
-            avg = sum(ss) / len(ss)
-            high = [x for x in ss if x >= 140]
-            st.write("")
-            if high:
-                st.error(f"⚠️ لديك {len(high)} قياس ضغط مرتفع")
-            else:
-                st.info(f"✅ متوسط الضغط: {avg:.0f} — طبيعي")
-
-    if len(ws) >= 2:
-        st.divider()
-        st.markdown("### 📈 الرسوم")
-        try:
-            import plotly.graph_objects as go
-            fig1 = go.Figure()
-            fig1.add_trace(go.Scatter(x=list(range(1, len(ws) + 1)), y=ws,
-                mode="lines+markers", name="الوزن",
-                line=dict(color="#e91e63", width=3), marker=dict(size=12)))
-            fig1.update_layout(title="⚖️ تطور الوزن", height=350,
-                plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)")
-            st.plotly_chart(fig1, use_container_width=True)
-        except Exception:
-            pass
-
-# ============ Tab 14: العدّاد ============
-with tab14:
-    st.markdown("## 🎂 العدّاد التنازلي")
-    st.caption("تابعي رحلتك أسبوعاً بأسبوع")
-
-    if "lmp_date" not in st.session_state:
-        st.session_state.lmp_date = "2026-06-01"
-
-    st.markdown("**📅 تاريخ آخر دورة (LMP)**")
-    lmp_input = st.text_input("YYYY-MM-DD", value=st.session_state.lmp_date, key="lmp_countdown", label_visibility="collapsed")
-    if lmp_input != st.session_state.lmp_date:
-        st.session_state.lmp_date = lmp_input
-
-    from src.tools import calculate_pregnancy_week
-    try:
-        week_info = json.loads(calculate_pregnancy_week(st.session_state.lmp_date))
-        weeks = week_info["weeks"]
-        days_remaining = week_info["days_remaining"]
-        trimester = week_info["trimester"]
-        due_date = week_info["due_date"]
-        progress = min(100, max(0, ((280 - days_remaining) / 280) * 100))
-
-        st.markdown(f"""
-        <div style="background: linear-gradient(135deg, #e91e63 0%, #9c27b0 100%);
-                    padding: 40px; border-radius: 24px; color: white; text-align: center;
-                    box-shadow: 0 16px 40px rgba(233,30,99,0.3); margin: 20px 0;">
-            <div style="font-size: 1.2em; opacity: 0.9;">🎉 متبقي</div>
-            <div style="font-size: 5em; font-weight: 800; line-height: 1;">{days_remaining}</div>
-            <div style="font-size: 1.3em; opacity: 0.95; margin-top: 8px;">يوم</div>
-            <div style="margin-top: 24px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.2);">
-                <div style="display: flex; justify-content: space-around;">
-                    <div>
-                        <div style="font-size: 0.85em; opacity: 0.85;">الأسبوع</div>
-                        <div style="font-size: 1.8em; font-weight: 700;">{weeks}</div>
-                    </div>
-                    <div>
-                        <div style="font-size: 0.85em; opacity: 0.85;">المرحلة</div>
-                        <div style="font-size: 1.2em; font-weight: 700;">{trimester}</div>
-                    </div>
-                    <div>
-                        <div style="font-size: 0.85em; opacity: 0.85;">الولادة</div>
-                        <div style="font-size: 1.1em; font-weight: 700;">{due_date}</div>
+            st.markdown(f"""
+            <div style="background: linear-gradient(135deg, #e91e63 0%, #9c27b0 100%);
+                        padding: 40px; border-radius: 24px; color: white; text-align: center;
+                        box-shadow: 0 16px 40px rgba(233,30,99,0.3); margin: 20px 0;">
+                <div style="font-size: 1.2em; opacity: 0.9;">🎉 متبقي</div>
+                <div style="font-size: 5em; font-weight: 800; line-height: 1;">{days_remaining}</div>
+                <div style="font-size: 1.3em; opacity: 0.95; margin-top: 8px;">يوم</div>
+                <div style="margin-top: 24px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.2);">
+                    <div style="display: flex; justify-content: space-around;">
+                        <div>
+                            <div style="font-size: 0.85em; opacity: 0.85;">الأسبوع</div>
+                            <div style="font-size: 1.8em; font-weight: 700;">{weeks}</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 0.85em; opacity: 0.85;">المرحلة</div>
+                            <div style="font-size: 1.2em; font-weight: 700;">{trimester}</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 0.85em; opacity: 0.85;">الولادة</div>
+                            <div style="font-size: 1.1em; font-weight: 700;">{due_date}</div>
+                        </div>
                     </div>
                 </div>
+            </div>
+            """, unsafe_allow_html=True)
+
+            st.markdown("### 📊 تقدم الحمل")
+            st.progress(progress / 100)
+            st.caption(f"{progress:.0f}% مكتمل")
+        except Exception:
+            st.error("⚠️ تأكدي من صيغة التاريخ")
+
+    # ============ Tab 15: الطوارئ ============
+
+
+# ════════════ المجموعة 5: ⚙️ إعدادات ════════════
+with main_tabs[4]:
+
+    sub_settings = st.tabs([
+        "🤝 شاركي",
+        "⚙️ الإعدادات",
+    ])
+
+    # ─── 🤝 شاركي (كان tab7) ───
+    with sub_settings[0]:
+        st.markdown("## 🤝 شاركي مع العائلة")
+        st.caption("شاركي بيانات حملك مع الزوج أو العائلة")
+
+        from datetime import datetime as _dt_share
+
+        user_dir = f"notes/users/{st.session_state.logged_in_user}"
+        share_file = os.path.join(user_dir, "share_settings.json")
+
+        settings = {"enabled": False, "share_code": "", "partner_name": ""}
+        if os.path.exists(share_file):
+            with open(share_file, "r", encoding="utf-8") as f:
+                settings = json.load(f)
+
+        import hashlib
+        if not settings.get("share_code"):
+            settings["share_code"] = hashlib.md5(st.session_state.logged_in_user.encode()).hexdigest()[:8].upper()
+
+        st.markdown("### ⚙️ إعدادات المشاركة")
+        settings["enabled"] = st.checkbox("تفعيل المشاركة", value=settings.get("enabled", False), key="share_enabled")
+        settings["partner_name"] = st.text_input("اسم الشريك", value=settings.get("partner_name", ""), key="partner_name_input")
+
+        if st.button("💾 احفظي الإعدادات", type="primary"):
+            with open(share_file, "w", encoding="utf-8") as f:
+                json.dump(settings, f, ensure_ascii=False, indent=2)
+            st.success("✅ تم الحفظ")
+            st.rerun()
+
+        st.divider()
+        st.markdown("### 🔑 رمز المشاركة")
+        st.markdown(f"""
+        <div style="background: linear-gradient(135deg, #e91e63, #9c27b0);
+                    padding: 28px; border-radius: 20px; text-align: center; color: white;">
+            <div style="font-size: 0.95em; opacity: 0.9;">شاركي هذا الرمز</div>
+            <div style="font-size: 3em; font-weight: 800; letter-spacing: 8px; margin: 16px 0;">
+                {settings['share_code']}
             </div>
         </div>
         """, unsafe_allow_html=True)
 
-        st.markdown("### 📊 تقدم الحمل")
-        st.progress(progress / 100)
-        st.caption(f"{progress:.0f}% مكتمل")
-    except Exception:
-        st.error("⚠️ تأكدي من صيغة التاريخ")
+        st.divider()
+        st.warning("🔒 الشريك يرى فقط: الأسبوع، المرحلة، موعد الولادة")
 
-# ============ Tab 15: الطوارئ ============
-with tab15:
-    st.markdown("## 🚨 الطوارئ")
+    # ============ Tab 8: السونار ============
 
-    st.error("""
-    **🚨 اذهبي للمستشفى فوراً إذا:**
-    - 🩸 نزيف مهبلي غزير
-    - 🤕 صداع شديد مع ضبابية الرؤية
-    - 💥 تشنجات
-    - 😖 ألم بطن حاد
-    - 👶 توقف حركة الجنين
-    - 🩺 ضغط 140/90 أو أعلى
-    - 🌡️ حرارة فوق 39
-    - 💧 تسرب سائل قبل الأسبوع 37
-    - ⏱️ انقباضات منتظمة قبل الأسبوع 37
-    """)
-
-    st.warning("""
-    **⚠️ اتصلي بطبيبك اليوم:**
-    - نزيف خفيف أو تبقيع
-    - ألم بطن متقطع
-    - حرقة بول
-    - تورم مفاجئ
-    - إفرازات غير طبيعية
-    - قلق مستمر
-    """)
-
-    st.markdown("### 📞 أرقام الطوارئ")
-    c1, c2, c3 = st.columns(3)
-    with c1:
-        st.metric("🚑 سوريا", "110")
-    with c2:
-        st.metric("🚑 أمريكا", "911")
-    with c3:
-        st.metric("🚑 بريطانيا", "999")
-
-# ============ Tab 16: الإعدادات ============
-with tab16:
-    st.markdown("""
-    <div style="background: linear-gradient(135deg, #e91e63, #9c27b0);
-                padding: 24px 28px; border-radius: 18px; color: white;
-                margin-bottom: 24px; box-shadow: 0 8px 24px rgba(233,30,99,0.25);">
-        <h2 style="margin: 0; color: white !important; font-size: 1.8em;">⚙️ الإعدادات</h2>
-        <p style="margin: 8px 0 0 0; opacity: 0.95; font-size: 1.05em;">
-            المظهر، الروابط، المحادثة، والحساب
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
-
-    # ========== المظهر ==========
-    st.markdown("""
-    <div style="background: linear-gradient(135deg, #fce4ec, #f3e5f5);
-                padding: 16px 20px; border-radius: 14px;
-                border-right: 5px solid #e91e63; margin: 20px 0 12px 0;">
-        <h3 style="margin: 0; color: #e91e63 !important; font-size: 1.3em;">🎨 المظهر</h3>
-    </div>
-    """, unsafe_allow_html=True)
-
-    theme = st.radio(
-        "اختاري الوضع:",
-        ["☀️ نهاري", "🌙 ليلي"],
-        horizontal=True,
-        key="settings_theme_final",
-        label_visibility="visible"
-    )
-
-    if theme == "🌙 ليلي":
+    # ─── ⚙️ الإعدادات (كان tab16) ───
+    with sub_settings[1]:
         st.markdown("""
-        <style>
-        .stApp { background: linear-gradient(180deg, #0d0d1a, #1a1a2e) !important; }
-        h1, h2, h3, h4, h5, h6, p, span, div, label, li { color: #e8e8f0 !important; }
-        .stChatMessage { background: #1a1a2e !important; }
-        .stTextInput input, .stNumberInput input, .stTextArea textarea {
-            background: #1a1a2e !important; color: #e8e8f0 !important;
-        }
-        
-/* ============ تكبير الخطوط عالمياً ============ */
-html, body, [class*="css"], .stApp {
-    font-size: 17px !important;
-}
+        <div style="background: linear-gradient(135deg, #e91e63, #9c27b0);
+                    padding: 24px 28px; border-radius: 18px; color: white;
+                    margin-bottom: 24px; box-shadow: 0 8px 24px rgba(233,30,99,0.25);">
+            <h2 style="margin: 0; color: white !important; font-size: 1.8em;">⚙️ الإعدادات</h2>
+            <p style="margin: 8px 0 0 0; opacity: 0.95; font-size: 1.05em;">
+                المظهر، الروابط، المحادثة، والحساب
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
 
-/* العناوين */
-h1 { font-size: 2.2em !important; line-height: 1.3 !important; }
-h2 { font-size: 1.7em !important; line-height: 1.3 !important; }
-h3 { font-size: 1.4em !important; line-height: 1.3 !important; }
-h4 { font-size: 1.2em !important; }
-h5 { font-size: 1.1em !important; }
-h6 { font-size: 1em !important; }
+        # ========== المظهر ==========
+        st.markdown("""
+        <div style="background: linear-gradient(135deg, #fce4ec, #f3e5f5);
+                    padding: 16px 20px; border-radius: 14px;
+                    border-right: 5px solid #e91e63; margin: 20px 0 12px 0;">
+            <h3 style="margin: 0; color: #e91e63 !important; font-size: 1.3em;">🎨 المظهر</h3>
+        </div>
+        """, unsafe_allow_html=True)
 
-/* النصوص */
-p, span, div, li, label {
-    font-size: 1.05em !important;
-    line-height: 1.6 !important;
-}
+        theme = st.radio(
+            "اختاري الوضع:",
+            ["☀️ نهاري", "🌙 ليلي"],
+            horizontal=True,
+            key="settings_theme_final",
+            label_visibility="visible"
+        )
 
-/* الأزرار */
-.stButton > button {
-    font-size: 1.05em !important;
-    padding: 12px 20px !important;
-    min-height: 46px !important;
-}
+        if theme == "🌙 ليلي":
+            st.markdown("""
+            <style>
+            .stApp { background: linear-gradient(180deg, #0d0d1a, #1a1a2e) !important; }
+            h1, h2, h3, h4, h5, h6, p, span, div, label, li { color: #e8e8f0 !important; }
+            .stChatMessage { background: #1a1a2e !important; }
+            .stTextInput input, .stNumberInput input, .stTextArea textarea {
+                background: #1a1a2e !important; color: #e8e8f0 !important;
+            }
 
-/* حقول الإدخال */
-.stTextInput input,
-.stNumberInput input,
-.stTextArea textarea,
-.stSelectbox select,
-.stMultiSelect {
-    font-size: 1.05em !important;
-    padding: 12px 16px !important;
-    min-height: 46px !important;
-}
-
-/* التبويبات */
-.stTabs [data-baseweb="tab"] {
-    font-size: 1.05em !important;
-    padding: 12px 18px !important;
-}
-
-/* Chat Input */
-[data-testid="stChatInput"] textarea {
-    font-size: 1.1em !important;
-    padding: 14px 20px !important;
-}
-
-/* Chat Messages */
-.stChatMessage {
-    font-size: 1.05em !important;
-    padding: 16px 20px !important;
-}
-
-/* Radio */
-.stRadio [role="radiogroup"] label {
-    font-size: 1.05em !important;
-    padding: 10px 14px !important;
-}
-
-/* Checkbox */
-.stCheckbox label {
-    font-size: 1.05em !important;
-}
-
-/* Metrics */
-[data-testid="stMetricValue"] {
-    font-size: 1.8em !important;
-}
-[data-testid="stMetricLabel"] {
-    font-size: 1em !important;
-}
-
-/* Caption */
-.stCaption, small {
-    font-size: 0.95em !important;
-    line-height: 1.5 !important;
-}
-
-/* Alerts */
-.stAlert, .stAlert p {
-    font-size: 1.05em !important;
-    line-height: 1.7 !important;
-}
-
-/* Expander */
-.streamlit-expanderHeader {
-    font-size: 1.05em !important;
-    padding: 14px 18px !important;
-}
-
-/* Markdown content */
-.stMarkdown p, .stMarkdown li {
-    font-size: 1.05em !important;
-    line-height: 1.7 !important;
-}
-.stMarkdown h1 { font-size: 2em !important; }
-.stMarkdown h2 { font-size: 1.6em !important; }
-.stMarkdown h3 { font-size: 1.35em !important; }
-
-/* Links */
-a {
-    font-size: 1.05em !important;
-}
-.stLinkButton a, .stLinkButton button {
-    font-size: 1.05em !important;
-    padding: 12px 16px !important;
-    min-height: 46px !important;
-}
-
-/* Sidebar (إن وُجد) */
-[data-testid="stSidebar"] {
-    font-size: 1.05em !important;
-}
-
-/* الجوال - خطوط أكبر */
-@media (max-width: 768px) {
-    html, body, [class*="css"], .stApp {
-        font-size: 16px !important;
-    }
-    h1 { font-size: 1.7em !important; }
-    h2 { font-size: 1.4em !important; }
-    h3 { font-size: 1.2em !important; }
-    h4 { font-size: 1.1em !important; }
-    p, span, div, li, label {
-        font-size: 1em !important;
-        line-height: 1.6 !important;
-    }
-    .stButton > button {
-        font-size: 1em !important;
-        padding: 12px 16px !important;
-        min-height: 48px !important;
-    }
-    .stTextInput input,
-    .stNumberInput input,
-    .stTextArea textarea {
-        font-size: 1em !important;
-        padding: 12px 14px !important;
-        min-height: 46px !important;
-    }
-    .stTabs [data-baseweb="tab"] {
-        font-size: 0.95em !important;
-        padding: 10px 14px !important;
-    }
-    .stChatMessage {
-        font-size: 1em !important;
-    }
-    [data-testid="stChatInput"] textarea {
-        font-size: 1em !important;
-    }
-}
-
-@media (max-width: 480px) {
-    h1 { font-size: 1.5em !important; }
-    h2 { font-size: 1.25em !important; }
-    h3 { font-size: 1.1em !important; }
-    .stButton > button {
-        font-size: 0.95em !important;
-        min-height: 46px !important;
-    }
-}
-
-/* ============================================================
-   Responsive Design — إصلاح كامل للشاشات الصغيرة
-   ============================================================ */
-
-/* منع تصغير الخطوط تلقائياً */
-html {
-    -webkit-text-size-adjust: 100% !important;
-    -moz-text-size-adjust: 100% !important;
-    -ms-text-size-adjust: 100% !important;
-    text-size-adjust: 100% !important;
-}
-
-/* الخط الأساسي لكل الشاشات */
-html, body, [class*="css"], .stApp {
-    font-size: 17px !important;
-}
-
-/* ============ الجوال (أقل من 900px) ============ */
-@media screen and (max-width: 900px) {
-    /* منع تصغير أي عنصر */
-    * {
-        font-size: inherit !important;
-    }
-    
-    /* الحاوية الرئيسية - كامل العرض */
-    .main .block-container,
-    [data-testid="stAppViewContainer"] > .main,
-    section.main {
-        padding: 12px 12px !important;
-        max-width: 100% !important;
-        width: 100% !important;
-    }
-    
-    /* الخطوط */
+    /* ============ تكبير الخطوط عالمياً ============ */
     html, body, [class*="css"], .stApp {
         font-size: 17px !important;
     }
-    
-    /* العناوين - واضحة دائماً */
-    h1, .stMarkdown h1 { font-size: 1.8em !important; line-height: 1.3 !important; }
-    h2, .stMarkdown h2 { font-size: 1.5em !important; line-height: 1.3 !important; }
-    h3, .stMarkdown h3 { font-size: 1.25em !important; line-height: 1.3 !important; }
-    h4, .stMarkdown h4 { font-size: 1.1em !important; }
-    
-    /* النصوص - لا تصغر */
-    p, span, div, li, label, td, th {
-        font-size: 1em !important;
+
+    /* العناوين */
+    h1 { font-size: 2.2em !important; line-height: 1.3 !important; }
+    h2 { font-size: 1.7em !important; line-height: 1.3 !important; }
+    h3 { font-size: 1.4em !important; line-height: 1.3 !important; }
+    h4 { font-size: 1.2em !important; }
+    h5 { font-size: 1.1em !important; }
+    h6 { font-size: 1em !important; }
+
+    /* النصوص */
+    p, span, div, li, label {
+        font-size: 1.05em !important;
         line-height: 1.6 !important;
     }
-    
-    /* الأزرار - كبيرة وواضحة */
+
+    /* الأزرار */
     .stButton > button {
-        font-size: 1em !important;
-        padding: 14px 18px !important;
-        min-height: 50px !important;
-        width: 100% !important;
-        white-space: normal !important;
-        word-wrap: break-word !important;
+        font-size: 1.05em !important;
+        padding: 12px 20px !important;
+        min-height: 46px !important;
     }
-    
-    /* حقول الإدخال - كبيرة */
+
+    /* حقول الإدخال */
     .stTextInput input,
     .stNumberInput input,
     .stTextArea textarea,
     .stSelectbox select,
-    [data-baseweb="select"] {
-        font-size: 1em !important;
-        padding: 14px 16px !important;
-        min-height: 50px !important;
-    }
-    
-    /* التبويبات - قابلة للسحب مع خط واضح */
-    .stTabs [data-baseweb="tab-list"] {
-        overflow-x: auto !important;
-        flex-wrap: nowrap !important;
-        gap: 4px !important;
-        padding: 4px !important;
-        -webkit-overflow-scrolling: touch !important;
-    }
-    
-    .stTabs [data-baseweb="tab"] {
-        font-size: 1em !important;
-        padding: 10px 14px !important;
-        white-space: nowrap !important;
-        flex-shrink: 0 !important;
-        min-height: 44px !important;
-    }
-    
-    /* الأعمدة → عمود واحد */
-    [data-testid="stHorizontalBlock"] {
-        flex-direction: column !important;
-        gap: 10px !important;
-        flex-wrap: wrap !important;
-    }
-    
-    [data-testid="stHorizontalBlock"] > div {
-        width: 100% !important;
-        min-width: 100% !important;
-        max-width: 100% !important;
-        flex: 1 1 100% !important;
-    }
-    
-    /* رسائل الدردشة */
-    .stChatMessage {
-        font-size: 1em !important;
-        padding: 14px 16px !important;
-    }
-    
-    [data-testid="stChatInput"] textarea {
-        font-size: 1em !important;
+    .stMultiSelect {
+        font-size: 1.05em !important;
         padding: 12px 16px !important;
-        min-height: 50px !important;
+        min-height: 46px !important;
     }
-    
-    /* Metrics */
-    [data-testid="stMetric"] {
-        padding: 14px !important;
+
+    /* التبويبات */
+    .stTabs [data-baseweb="tab"] {
+        font-size: 1.05em !important;
+        padding: 12px 18px !important;
     }
-    
-    [data-testid="stMetricValue"] {
-        font-size: 1.6em !important;
+
+    /* Chat Input */
+    [data-testid="stChatInput"] textarea {
+        font-size: 1.1em !important;
+        padding: 14px 20px !important;
     }
-    
-    [data-testid="stMetricLabel"] {
-        font-size: 0.95em !important;
+
+    /* Chat Messages */
+    .stChatMessage {
+        font-size: 1.05em !important;
+        padding: 16px 20px !important;
     }
-    
+
     /* Radio */
-    .stRadio [role="radiogroup"] {
-        gap: 8px !important;
-    }
-    
     .stRadio [role="radiogroup"] label {
-        font-size: 1em !important;
+        font-size: 1.05em !important;
         padding: 10px 14px !important;
-        min-height: 44px !important;
     }
-    
+
     /* Checkbox */
     .stCheckbox label {
-        font-size: 1em !important;
-        min-height: 40px !important;
+        font-size: 1.05em !important;
     }
-    
-    /* Alerts */
-    .stAlert, .stAlert p {
-        font-size: 1em !important;
-        line-height: 1.6 !important;
-        padding: 14px 16px !important;
+
+    /* Metrics */
+    [data-testid="stMetricValue"] {
+        font-size: 1.8em !important;
     }
-    
-    /* Expander */
-    .streamlit-expanderHeader {
+    [data-testid="stMetricLabel"] {
         font-size: 1em !important;
-        padding: 12px 14px !important;
-        min-height: 48px !important;
     }
-    
-    /* Link Button */
-    .stLinkButton a, .stLinkButton button {
-        font-size: 1em !important;
-        padding: 14px 16px !important;
-        min-height: 50px !important;
-        width: 100% !important;
-    }
-    
+
     /* Caption */
     .stCaption, small {
-        font-size: 0.9em !important;
+        font-size: 0.95em !important;
         line-height: 1.5 !important;
     }
-    
-    /* Markdown */
+
+    /* Alerts */
+    .stAlert, .stAlert p {
+        font-size: 1.05em !important;
+        line-height: 1.7 !important;
+    }
+
+    /* Expander */
+    .streamlit-expanderHeader {
+        font-size: 1.05em !important;
+        padding: 14px 18px !important;
+    }
+
+    /* Markdown content */
     .stMarkdown p, .stMarkdown li {
-        font-size: 1em !important;
-        line-height: 1.6 !important;
+        font-size: 1.05em !important;
+        line-height: 1.7 !important;
     }
-    
-    /* Plotly */
-    .js-plotly-plot, .plotly {
-        height: 280px !important;
+    .stMarkdown h1 { font-size: 2em !important; }
+    .stMarkdown h2 { font-size: 1.6em !important; }
+    .stMarkdown h3 { font-size: 1.35em !important; }
+
+    /* Links */
+    a {
+        font-size: 1.05em !important;
     }
-    
-    /* Audio */
-    audio {
-        width: 100% !important;
-        height: 44px !important;
+    .stLinkButton a, .stLinkButton button {
+        font-size: 1.05em !important;
+        padding: 12px 16px !important;
+        min-height: 46px !important;
     }
-    
-    /* Images */
-    .stImage img {
-        width: 100% !important;
-        height: auto !important;
-    }
-    
-    /* File Uploader */
-    [data-testid="stFileUploader"] {
-        font-size: 1em !important;
-    }
-    
-    /* Sidebar - إن وُجد */
+
+    /* Sidebar (إن وُجد) */
     [data-testid="stSidebar"] {
-        min-width: 280px !important;
+        font-size: 1.05em !important;
     }
-    
-    [data-testid="stSidebar"] * {
-        font-size: 1em !important;
-    }
-}
 
-/* ============ الجوال الصغير (أقل من 480px) ============ */
-@media screen and (max-width: 480px) {
+    /* الجوال - خطوط أكبر */
+    @media (max-width: 768px) {
+        html, body, [class*="css"], .stApp {
+            font-size: 16px !important;
+        }
+        h1 { font-size: 1.7em !important; }
+        h2 { font-size: 1.4em !important; }
+        h3 { font-size: 1.2em !important; }
+        h4 { font-size: 1.1em !important; }
+        p, span, div, li, label {
+            font-size: 1em !important;
+            line-height: 1.6 !important;
+        }
+        .stButton > button {
+            font-size: 1em !important;
+            padding: 12px 16px !important;
+            min-height: 48px !important;
+        }
+        .stTextInput input,
+        .stNumberInput input,
+        .stTextArea textarea {
+            font-size: 1em !important;
+            padding: 12px 14px !important;
+            min-height: 46px !important;
+        }
+        .stTabs [data-baseweb="tab"] {
+            font-size: 0.95em !important;
+            padding: 10px 14px !important;
+        }
+        .stChatMessage {
+            font-size: 1em !important;
+        }
+        [data-testid="stChatInput"] textarea {
+            font-size: 1em !important;
+        }
+    }
+
+    @media (max-width: 480px) {
+        h1 { font-size: 1.5em !important; }
+        h2 { font-size: 1.25em !important; }
+        h3 { font-size: 1.1em !important; }
+        .stButton > button {
+            font-size: 0.95em !important;
+            min-height: 46px !important;
+        }
+    }
+
+    /* ============================================================
+       Responsive Design — إصلاح كامل للشاشات الصغيرة
+       ============================================================ */
+
+    /* منع تصغير الخطوط تلقائياً */
+    html {
+        -webkit-text-size-adjust: 100% !important;
+        -moz-text-size-adjust: 100% !important;
+        -ms-text-size-adjust: 100% !important;
+        text-size-adjust: 100% !important;
+    }
+
+    /* الخط الأساسي لكل الشاشات */
     html, body, [class*="css"], .stApp {
-        font-size: 16px !important;
+        font-size: 17px !important;
     }
-    
-    .main .block-container {
-        padding: 8px 8px !important;
-    }
-    
-    h1, .stMarkdown h1 { font-size: 1.5em !important; }
-    h2, .stMarkdown h2 { font-size: 1.3em !important; }
-    h3, .stMarkdown h3 { font-size: 1.1em !important; }
-    
-    .stButton > button {
-        font-size: 0.95em !important;
-        padding: 12px 14px !important;
-        min-height: 48px !important;
-    }
-    
-    .stTabs [data-baseweb="tab"] {
-        font-size: 0.9em !important;
-        padding: 8px 10px !important;
-    }
-    
-    [data-testid="stMetricValue"] {
-        font-size: 1.4em !important;
-    }
-}
 
-/* ============ الجوال الأفقي ============ */
-@media screen and (max-width: 900px) and (orientation: landscape) {
-    .main .block-container {
-        padding: 8px 16px !important;
-    }
-    
-    h1 { font-size: 1.5em !important; }
-    h2 { font-size: 1.3em !important; }
-}
+    /* ============ الجوال (أقل من 900px) ============ */
+    @media screen and (max-width: 900px) {
+        /* منع تصغير أي عنصر */
+        * {
+            font-size: inherit !important;
+        }
 
-/* ============ منع أي تصغير تلقائي للخطوط ============ */
-* {
-    -webkit-text-size-adjust: none !important;
-    text-size-adjust: none !important;
-}
-</style>
+        /* الحاوية الرئيسية - كامل العرض */
+        .main .block-container,
+        [data-testid="stAppViewContainer"] > .main,
+        section.main {
+            padding: 12px 12px !important;
+            max-width: 100% !important;
+            width: 100% !important;
+        }
+
+        /* الخطوط */
+        html, body, [class*="css"], .stApp {
+            font-size: 17px !important;
+        }
+
+        /* العناوين - واضحة دائماً */
+        h1, .stMarkdown h1 { font-size: 1.8em !important; line-height: 1.3 !important; }
+        h2, .stMarkdown h2 { font-size: 1.5em !important; line-height: 1.3 !important; }
+        h3, .stMarkdown h3 { font-size: 1.25em !important; line-height: 1.3 !important; }
+        h4, .stMarkdown h4 { font-size: 1.1em !important; }
+
+        /* النصوص - لا تصغر */
+        p, span, div, li, label, td, th {
+            font-size: 1em !important;
+            line-height: 1.6 !important;
+        }
+
+        /* الأزرار - كبيرة وواضحة */
+        .stButton > button {
+            font-size: 1em !important;
+            padding: 14px 18px !important;
+            min-height: 50px !important;
+            width: 100% !important;
+            white-space: normal !important;
+            word-wrap: break-word !important;
+        }
+
+        /* حقول الإدخال - كبيرة */
+        .stTextInput input,
+        .stNumberInput input,
+        .stTextArea textarea,
+        .stSelectbox select,
+        [data-baseweb="select"] {
+            font-size: 1em !important;
+            padding: 14px 16px !important;
+            min-height: 50px !important;
+        }
+
+        /* التبويبات - قابلة للسحب مع خط واضح */
+        .stTabs [data-baseweb="tab-list"] {
+            overflow-x: auto !important;
+            flex-wrap: nowrap !important;
+            gap: 4px !important;
+            padding: 4px !important;
+            -webkit-overflow-scrolling: touch !important;
+        }
+
+        .stTabs [data-baseweb="tab"] {
+            font-size: 1em !important;
+            padding: 10px 14px !important;
+            white-space: nowrap !important;
+            flex-shrink: 0 !important;
+            min-height: 44px !important;
+        }
+
+        /* الأعمدة → عمود واحد */
+        [data-testid="stHorizontalBlock"] {
+            flex-direction: column !important;
+            gap: 10px !important;
+            flex-wrap: wrap !important;
+        }
+
+        [data-testid="stHorizontalBlock"] > div {
+            width: 100% !important;
+            min-width: 100% !important;
+            max-width: 100% !important;
+            flex: 1 1 100% !important;
+        }
+
+        /* رسائل الدردشة */
+        .stChatMessage {
+            font-size: 1em !important;
+            padding: 14px 16px !important;
+        }
+
+        [data-testid="stChatInput"] textarea {
+            font-size: 1em !important;
+            padding: 12px 16px !important;
+            min-height: 50px !important;
+        }
+
+        /* Metrics */
+        [data-testid="stMetric"] {
+            padding: 14px !important;
+        }
+
+        [data-testid="stMetricValue"] {
+            font-size: 1.6em !important;
+        }
+
+        [data-testid="stMetricLabel"] {
+            font-size: 0.95em !important;
+        }
+
+        /* Radio */
+        .stRadio [role="radiogroup"] {
+            gap: 8px !important;
+        }
+
+        .stRadio [role="radiogroup"] label {
+            font-size: 1em !important;
+            padding: 10px 14px !important;
+            min-height: 44px !important;
+        }
+
+        /* Checkbox */
+        .stCheckbox label {
+            font-size: 1em !important;
+            min-height: 40px !important;
+        }
+
+        /* Alerts */
+        .stAlert, .stAlert p {
+            font-size: 1em !important;
+            line-height: 1.6 !important;
+            padding: 14px 16px !important;
+        }
+
+        /* Expander */
+        .streamlit-expanderHeader {
+            font-size: 1em !important;
+            padding: 12px 14px !important;
+            min-height: 48px !important;
+        }
+
+        /* Link Button */
+        .stLinkButton a, .stLinkButton button {
+            font-size: 1em !important;
+            padding: 14px 16px !important;
+            min-height: 50px !important;
+            width: 100% !important;
+        }
+
+        /* Caption */
+        .stCaption, small {
+            font-size: 0.9em !important;
+            line-height: 1.5 !important;
+        }
+
+        /* Markdown */
+        .stMarkdown p, .stMarkdown li {
+            font-size: 1em !important;
+            line-height: 1.6 !important;
+        }
+
+        /* Plotly */
+        .js-plotly-plot, .plotly {
+            height: 280px !important;
+        }
+
+        /* Audio */
+        audio {
+            width: 100% !important;
+            height: 44px !important;
+        }
+
+        /* Images */
+        .stImage img {
+            width: 100% !important;
+            height: auto !important;
+        }
+
+        /* File Uploader */
+        [data-testid="stFileUploader"] {
+            font-size: 1em !important;
+        }
+
+        /* Sidebar - إن وُجد */
+        [data-testid="stSidebar"] {
+            min-width: 280px !important;
+        }
+
+        [data-testid="stSidebar"] * {
+            font-size: 1em !important;
+        }
+    }
+
+    /* ============ الجوال الصغير (أقل من 480px) ============ */
+    @media screen and (max-width: 480px) {
+        html, body, [class*="css"], .stApp {
+            font-size: 16px !important;
+        }
+
+        .main .block-container {
+            padding: 8px 8px !important;
+        }
+
+        h1, .stMarkdown h1 { font-size: 1.5em !important; }
+        h2, .stMarkdown h2 { font-size: 1.3em !important; }
+        h3, .stMarkdown h3 { font-size: 1.1em !important; }
+
+        .stButton > button {
+            font-size: 0.95em !important;
+            padding: 12px 14px !important;
+            min-height: 48px !important;
+        }
+
+        .stTabs [data-baseweb="tab"] {
+            font-size: 0.9em !important;
+            padding: 8px 10px !important;
+        }
+
+        [data-testid="stMetricValue"] {
+            font-size: 1.4em !important;
+        }
+    }
+
+    /* ============ الجوال الأفقي ============ */
+    @media screen and (max-width: 900px) and (orientation: landscape) {
+        .main .block-container {
+            padding: 8px 16px !important;
+        }
+
+        h1 { font-size: 1.5em !important; }
+        h2 { font-size: 1.3em !important; }
+    }
+
+    /* ============ منع أي تصغير تلقائي للخطوط ============ */
+    * {
+        -webkit-text-size-adjust: none !important;
+        text-size-adjust: none !important;
+    }
+    </style>
+            """, unsafe_allow_html=True)
+
+        st.divider()
+
+        # ========== الروابط ==========
+        st.markdown("""
+        <div style="background: linear-gradient(135deg, #e3f2fd, #e1f5fe);
+                    padding: 16px 20px; border-radius: 14px;
+                    border-right: 5px solid #2196f3; margin: 20px 0 12px 0;">
+            <h3 style="margin: 0; color: #1565c0 !important; font-size: 1.3em;">🔗 روابط مفيدة</h3>
+        </div>
         """, unsafe_allow_html=True)
 
-    st.divider()
+        st.markdown("""
+        <div style="background: white; padding: 18px 22px; border-radius: 14px;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.06); border: 1px solid #e8e0ec;
+                    margin-bottom: 12px;">
+            <h4 style="margin: 0 0 12px 0; color: #1a1a2e; font-size: 1.15em;">📚 مصادر طبية موثوقة</h4>
+            <p style="margin: 8px 0; font-size: 1.05em; line-height: 1.8;">
+                🌍 <b>WHO</b> — منظمة الصحة العالمية<br>
+                👩‍⚕️ <b>ACOG</b> — طب النساء والتوليد<br>
+                🏥 <b>NHS</b> — هيئة الصحة البريطانية
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
 
-    # ========== الروابط ==========
-    st.markdown("""
-    <div style="background: linear-gradient(135deg, #e3f2fd, #e1f5fe);
-                padding: 16px 20px; border-radius: 14px;
-                border-right: 5px solid #2196f3; margin: 20px 0 12px 0;">
-        <h3 style="margin: 0; color: #1565c0 !important; font-size: 1.3em;">🔗 روابط مفيدة</h3>
-    </div>
-    """, unsafe_allow_html=True)
+        c1, c2 = st.columns(2)
+        with c1:
+            if st.button("🌍 WHO", use_container_width=True, key="btn_who"):
+                st.markdown("[افتحي WHO](https://www.who.int/health-topics/maternal-health)", unsafe_allow_html=True)
+            if st.button("👩‍⚕️ ACOG", use_container_width=True, key="btn_acog"):
+                st.markdown("[افتحي ACOG](https://www.acog.org/womens-health/pregnancy)", unsafe_allow_html=True)
+        with c2:
+            if st.button("🏥 NHS", use_container_width=True, key="btn_nhs"):
+                st.markdown("[افتحي NHS](https://www.nhs.uk/pregnancy/)", unsafe_allow_html=True)
+            if st.button("🗺️ مستشفى", use_container_width=True, key="btn_map"):
+                st.markdown("[افتحي Maps](https://www.google.com/maps/search/مستشفى+ولادة)", unsafe_allow_html=True)
 
-    st.markdown("""
-    <div style="background: white; padding: 18px 22px; border-radius: 14px;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.06); border: 1px solid #e8e0ec;
-                margin-bottom: 12px;">
-        <h4 style="margin: 0 0 12px 0; color: #1a1a2e; font-size: 1.15em;">📚 مصادر طبية موثوقة</h4>
-        <p style="margin: 8px 0; font-size: 1.05em; line-height: 1.8;">
-            🌍 <b>WHO</b> — منظمة الصحة العالمية<br>
-            👩‍⚕️ <b>ACOG</b> — طب النساء والتوليد<br>
-            🏥 <b>NHS</b> — هيئة الصحة البريطانية
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
+        st.markdown("""
+        <div style="background: linear-gradient(135deg, #ffebee, #fce4ec);
+                    padding: 16px 20px; border-radius: 14px; margin-top: 16px;
+                    border-right: 5px solid #d32f2f;">
+            <h4 style="margin: 0 0 8px 0; color: #c62828; font-size: 1.15em;">🚑 أرقام الطوارئ</h4>
+            <p style="margin: 4px 0; font-size: 1.1em; color: #1a1a2e;">
+                🇸🇾 سوريا: <b>110</b> • 🇺🇸 أمريكا: <b>911</b> • 🇬🇧 بريطانيا: <b>999</b>
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
 
-    c1, c2 = st.columns(2)
-    with c1:
-        if st.button("🌍 WHO", use_container_width=True, key="btn_who"):
-            st.markdown("[افتحي WHO](https://www.who.int/health-topics/maternal-health)", unsafe_allow_html=True)
-        if st.button("👩‍⚕️ ACOG", use_container_width=True, key="btn_acog"):
-            st.markdown("[افتحي ACOG](https://www.acog.org/womens-health/pregnancy)", unsafe_allow_html=True)
-    with c2:
-        if st.button("🏥 NHS", use_container_width=True, key="btn_nhs"):
-            st.markdown("[افتحي NHS](https://www.nhs.uk/pregnancy/)", unsafe_allow_html=True)
-        if st.button("🗺️ مستشفى", use_container_width=True, key="btn_map"):
-            st.markdown("[افتحي Maps](https://www.google.com/maps/search/مستشفى+ولادة)", unsafe_allow_html=True)
+        st.divider()
 
-    st.markdown("""
-    <div style="background: linear-gradient(135deg, #ffebee, #fce4ec);
-                padding: 16px 20px; border-radius: 14px; margin-top: 16px;
-                border-right: 5px solid #d32f2f;">
-        <h4 style="margin: 0 0 8px 0; color: #c62828; font-size: 1.15em;">🚑 أرقام الطوارئ</h4>
-        <p style="margin: 4px 0; font-size: 1.1em; color: #1a1a2e;">
-            🇸🇾 سوريا: <b>110</b> • 🇺🇸 أمريكا: <b>911</b> • 🇬🇧 بريطانيا: <b>999</b>
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
+        # ========== المحادثة ==========
+        st.markdown("""
+        <div style="background: linear-gradient(135deg, #fff3e0, #fff8e1);
+                    padding: 16px 20px; border-radius: 14px;
+                    border-right: 5px solid #ff9800; margin: 20px 0 12px 0;">
+            <h3 style="margin: 0; color: #e65100 !important; font-size: 1.3em;">💾 المحادثة</h3>
+        </div>
+        """, unsafe_allow_html=True)
 
-    st.divider()
+        col_a, col_b = st.columns(2)
+        with col_a:
+            if st.button("💾 حفظ المحادثة", use_container_width=True, type="primary", key="settings_save_final"):
+                try:
+                    from datetime import datetime as _dt
+                    cdir = f"notes/users/{st.session_state.logged_in_user}/conversations"
+                    os.makedirs(cdir, exist_ok=True)
+                    fn = f"{cdir}/محادثة-{_dt.now().strftime('%Y%m%d-%H%M%S')}.json"
+                    with open(fn, "w", encoding="utf-8") as f:
+                        data = [m if isinstance(m, dict) else {"role": getattr(m, "role", ""), "content": getattr(m, "content", "")} for m in st.session_state.messages]
+                        json.dump(data, f, ensure_ascii=False, indent=2)
+                    st.success("✅ تم الحفظ")
+                except Exception as e:
+                    st.error(f"خطأ: {e}")
+        with col_b:
+            if st.button("🗑️ مسح المحادثة", use_container_width=True, key="settings_clear_final"):
+                st.session_state.messages = [{"role": "system", "content": SYSTEM_PROMPT}]
+                st.success("✅ تم المسح")
+                st.rerun()
 
-    # ========== المحادثة ==========
-    st.markdown("""
-    <div style="background: linear-gradient(135deg, #fff3e0, #fff8e1);
-                padding: 16px 20px; border-radius: 14px;
-                border-right: 5px solid #ff9800; margin: 20px 0 12px 0;">
-        <h3 style="margin: 0; color: #e65100 !important; font-size: 1.3em;">💾 المحادثة</h3>
-    </div>
-    """, unsafe_allow_html=True)
+        cdir = f"notes/users/{st.session_state.logged_in_user}/conversations"
+        os.makedirs(cdir, exist_ok=True)
+        saved = sorted([f for f in os.listdir(cdir) if f.endswith(".json")], reverse=True)
+        if saved:
+            sel = st.selectbox("📁 محفوظات", ["— اختر —"] + saved, key="settings_load_sel_final")
+            if sel and sel != "— اختر —":
+                c_x, c_y = st.columns(2)
+                with c_x:
+                    if st.button("📂 تحميل", key="settings_load_final", use_container_width=True):
+                        with open(os.path.join(cdir, sel), "r", encoding="utf-8") as f:
+                            st.session_state.messages = json.load(f)
+                        st.rerun()
+                with c_y:
+                    if st.button("🗑️ حذف", key="settings_del_final", use_container_width=True):
+                        os.remove(os.path.join(cdir, sel))
+                        st.rerun()
 
-    col_a, col_b = st.columns(2)
-    with col_a:
-        if st.button("💾 حفظ المحادثة", use_container_width=True, type="primary", key="settings_save_final"):
+        st.divider()
+
+        # ========== الحساب ==========
+        st.markdown("""
+        <div style="background: linear-gradient(135deg, #f3e5f5, #ede7f6);
+                    padding: 16px 20px; border-radius: 14px;
+                    border-right: 5px solid #9c27b0; margin: 20px 0 12px 0;">
+            <h3 style="margin: 0; color: #6a1b9a !important; font-size: 1.3em;">🚪 الحساب</h3>
+        </div>
+        """, unsafe_allow_html=True)
+
+        st.markdown(f"""
+        <div style="background: white; padding: 18px 22px; border-radius: 14px;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.06); border: 1px solid #e8e0ec;
+                    margin-bottom: 16px; text-align: center;">
+            <p style="margin: 0; font-size: 1.2em; color: #1a1a2e;">
+                👤 مسجّلة الدخول باسم: <b style="color: #e91e63;">{st.session_state.logged_in_user}</b>
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+
+        if st.button("🚪 تسجيل خروج", use_container_width=True, type="primary", key="settings_logout_final"):
+            st.session_state.logged_in_user = None
             try:
-                from datetime import datetime as _dt
-                cdir = f"notes/users/{st.session_state.logged_in_user}/conversations"
-                os.makedirs(cdir, exist_ok=True)
-                fn = f"{cdir}/محادثة-{_dt.now().strftime('%Y%m%d-%H%M%S')}.json"
-                with open(fn, "w", encoding="utf-8") as f:
-                    data = [m if isinstance(m, dict) else {"role": getattr(m, "role", ""), "content": getattr(m, "content", "")} for m in st.session_state.messages]
-                    json.dump(data, f, ensure_ascii=False, indent=2)
-                st.success("✅ تم الحفظ")
-            except Exception as e:
-                st.error(f"خطأ: {e}")
-    with col_b:
-        if st.button("🗑️ مسح المحادثة", use_container_width=True, key="settings_clear_final"):
-            st.session_state.messages = [{"role": "system", "content": SYSTEM_PROMPT}]
-            st.success("✅ تم المسح")
+                st.query_params.clear()
+            except Exception:
+                pass
             st.rerun()
 
-    cdir = f"notes/users/{st.session_state.logged_in_user}/conversations"
-    os.makedirs(cdir, exist_ok=True)
-    saved = sorted([f for f in os.listdir(cdir) if f.endswith(".json")], reverse=True)
-    if saved:
-        sel = st.selectbox("📁 محفوظات", ["— اختر —"] + saved, key="settings_load_sel_final")
-        if sel and sel != "— اختر —":
-            c_x, c_y = st.columns(2)
-            with c_x:
-                if st.button("📂 تحميل", key="settings_load_final", use_container_width=True):
-                    with open(os.path.join(cdir, sel), "r", encoding="utf-8") as f:
-                        st.session_state.messages = json.load(f)
-                    st.rerun()
-            with c_y:
-                if st.button("🗑️ حذف", key="settings_del_final", use_container_width=True):
-                    os.remove(os.path.join(cdir, sel))
-                    st.rerun()
-
-    st.divider()
-
-    # ========== الحساب ==========
-    st.markdown("""
-    <div style="background: linear-gradient(135deg, #f3e5f5, #ede7f6);
-                padding: 16px 20px; border-radius: 14px;
-                border-right: 5px solid #9c27b0; margin: 20px 0 12px 0;">
-        <h3 style="margin: 0; color: #6a1b9a !important; font-size: 1.3em;">🚪 الحساب</h3>
-    </div>
-    """, unsafe_allow_html=True)
-
-    st.markdown(f"""
-    <div style="background: white; padding: 18px 22px; border-radius: 14px;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.06); border: 1px solid #e8e0ec;
-                margin-bottom: 16px; text-align: center;">
-        <p style="margin: 0; font-size: 1.2em; color: #1a1a2e;">
-            👤 مسجّلة الدخول باسم: <b style="color: #e91e63;">{st.session_state.logged_in_user}</b>
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
-
-    if st.button("🚪 تسجيل خروج", use_container_width=True, type="primary", key="settings_logout_final"):
-        st.session_state.logged_in_user = None
-        try:
-            st.query_params.clear()
-        except Exception:
-            pass
-        st.rerun()
