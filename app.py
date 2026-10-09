@@ -18,9 +18,13 @@ if "messages" not in st.session_state:
     st.session_state.messages = [{"role": "system", "content": SYSTEM_PROMPT}]
 if "logged_in_user" not in st.session_state:
     st.session_state.logged_in_user = None
+if "just_logged_out" not in st.session_state:
+    st.session_state.just_logged_out = False
 
 # محاولة استرجاع المستخدمة من query_params (عند refresh)
-if st.session_state.logged_in_user is None:
+# لكن ليس إذا خرجت للتو
+if (st.session_state.logged_in_user is None 
+    and not st.session_state.get("just_logged_out", False)):
     try:
         _qp_user = st.query_params.get("u")
         if _qp_user and _qp_user in list_users():
@@ -2682,6 +2686,7 @@ with main_tabs[4]:
         """, unsafe_allow_html=True)
 
         if st.button("🚪 تسجيل خروج", use_container_width=True, type="primary", key="settings_logout_final"):
+            st.session_state.just_logged_out = True
             st.session_state.logged_in_user = None
             try:
                 st.query_params.clear()
